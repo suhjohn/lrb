@@ -26,6 +26,11 @@ string current_timestamp() {
     return buf;
 }
 
+uint64_t get_utc_timestamp() {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+}
+
 int main(int argc, char *argv[]) {
     // output help if insufficient params
     if (argc < 4) {
@@ -98,6 +103,21 @@ int main(int argc, char *argv[]) {
     value_builder.append(kvp("simulation_timestamp", simulation_timestamp));
 
     cout << bsoncxx::to_json(value_builder.view()) << endl;
+
+    // Output to local fs if desired
+    auto results_dir = getenv("WEBCACHESIM_RESULT_DIR");
+    if (results_dir) {
+        cerr << "error: WEBCACHESIM_RESULT_DIR is not set. Set to the directory where results will be dumped" << endl;
+        if (params.count("task_id")) {
+            task_id = params["task_id"];
+        } else {
+            task_id = to_string(get_utc_timestamp());
+        }
+        string json_result = bsoncxx::to_json(value_builder.view());
+        std::ofstream outfile;
+        outfile.open(string(results_dir) + '/' + task_id);
+        outfile << json_result;
+    }
 
     try {
         mongocxx::client client = mongocxx::client{mongocxx::uri(params["dburi"])};

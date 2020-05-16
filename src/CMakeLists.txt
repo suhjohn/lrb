@@ -21,6 +21,10 @@ set(LIB_SOURCE
         random_helper.cpp
         ${WEBCACHESIM_HEADER_DIR}/bloom_filter.h
 
+        ${WEBCACHESIM_HEADER_DIR}/filter.h
+        ${WEBCACHESIM_HEADER_DIR}/filters/bloom.h
+        filters/bloom.cpp
+
         ${WEBCACHESIM_HEADER_DIR}/caches/lru_variants.h
         caches/lru_variants.cpp
         ${WEBCACHESIM_HEADER_DIR}/caches/belady.h

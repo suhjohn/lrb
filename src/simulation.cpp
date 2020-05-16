@@ -22,7 +22,7 @@ using bsoncxx::builder::basic::sub_array;
 
 
 FrameWork::FrameWork(const string &trace_file, const string &cache_type, const uint64_t &cache_size,
-                     map<string, string> &params) {
+                     map <string, string> &params) {
     _trace_file = trace_file;
     _cache_type = cache_type;
     _cache_size = cache_size;
@@ -89,11 +89,23 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
         cerr << "cache type not implemented" << endl;
         abort();
     }
-
     // configure cache size
     webcache->setSize(cache_size);
 
     webcache->init_with_params(params);
+
+    // set admission filter
+    if (params.count("filter_type")) {
+        filter = move(Filter::create_unique(filter_type));
+        if (filter == nullptr) {
+            cerr << "filter type not implemented" << endl;
+            abort();
+        }
+        filter->init_with_params(params);
+    }
+    if (params.count("version")) {
+        version = stoi(params["version"]);
+    }
 
     adjust_real_time_offset();
     extra_features = vector<uint16_t>(n_extra_fields);
@@ -153,9 +165,9 @@ void FrameWork::update_stats() {
 
 bsoncxx::builder::basic::document FrameWork::simulate() {
     cerr << "simulating" << endl;
-    unordered_map<uint64_t, uint32_t> future_timestamps;
-    vector<uint8_t> eviction_qualities;
-    vector<uint16_t> eviction_logic_timestamps;
+    unordered_map <uint64_t, uint32_t> future_timestamps;
+    vector <uint8_t> eviction_qualities;
+    vector <uint16_t> eviction_logic_timestamps;
     if (bloom_filter) {
         filter = new AkamaiBloomFilter;
     }
@@ -203,26 +215,35 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
         else
             req->reinit(id, size, seq, &extra_features);
 
-        bool is_admitting = true;
-        if (true == bloom_filter) {
-            bool exist_in_cache = webcache->exist(req->_id);
-            //in cache object, not consider bloom_filter
-            if (false == exist_in_cache) {
-                is_admitting = filter->exist_or_insert(id);
-            }
-        }
-        if (is_admitting) {
-            bool is_hit = webcache->lookup(*req);
-            if (!is_hit) {
+        auto should_filter = filter->should_filter(*req);
+
+        // Different admission strategy depending on version
+        if (version == 1) {
+            // if we should filter the object, we do not even lookup in cache.
+            // otherwise, we lookup in cache. If not exist, admit.
+            if (should_filter) {
                 update_metric_req(byte_miss, obj_miss, size);
-                update_metric_req(rt_byte_miss, rt_obj_miss, size)
-                byte_miss_cache += size;
-                webcache->admit(*req);
+                update_metric_req(rt_byte_miss, rt_obj_miss, size);
+                byte_miss_filter += size;
+            } else {
+                if (!cache->lookup(*req)) {
+                    update_metric_req(byte_miss, obj_miss, size);
+                    update_metric_req(rt_byte_miss, rt_obj_miss, size);
+                    cache->admit(*req);
+                }
+            }
+        } else if (version == 2) {
+            // if does not exists in cache, it's a miss.
+            // we only add if we should not filter the object.
+            if (!cache->lookup(*req)) {
+                update_metric_req(byte_miss, obj_miss, size);
+                update_metric_req(rt_byte_miss, rt_obj_miss, size);
+                if (!should_filter) {
+                    cache->admit(*req);
+                }
             }
         } else {
-            update_metric_req(byte_miss, obj_miss, size);
-            update_metric_req(rt_byte_miss, rt_obj_miss, size)
-            byte_miss_filter += size;
+            abort();
         }
 
         ++seq;
@@ -298,14 +319,14 @@ bsoncxx::builder::basic::document FrameWork::simulation_results() {
 }
 
 bsoncxx::builder::basic::document _simulation(string trace_file, string cache_type, uint64_t cache_size,
-                                              map<string, string> params) {
+                                              map <string, string> params) {
     FrameWork frame_work(trace_file, cache_type, cache_size, params);
     auto res = frame_work.simulate();
     return res;
 }
 
 bsoncxx::builder::basic::document simulation(string trace_file, string cache_type,
-                                             uint64_t cache_size, map<string, string> params) {
+                                             uint64_t cache_size, map <string, string> params) {
     int n_extra_fields = get_n_fields(trace_file) - 3;
     params["n_extra_fields"] = to_string(n_extra_fields);
 
