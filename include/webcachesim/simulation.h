@@ -12,6 +12,7 @@
 #include <bsoncxx/builder/basic/document.hpp>
 #include <unordered_set>
 #include "cache.h"
+#include "filter.h"
 #include "bsoncxx/document/view.hpp"
 #include "bloom_filter.h"
 
