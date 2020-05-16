@@ -70,6 +70,7 @@ set(LIB_SOURCE
 add_library(webcachesim SHARED ${LIB_SOURCE})
 target_include_directories(webcachesim PUBLIC ${WEBCACHESIM_HEADER_DIR})
 target_include_directories(webcachesim PUBLIC ${WEBCACHESIM_HEADER_DIR}/caches)
+target_include_directories(webcachesim PUBLIC ${WEBCACHESIM_HEADER_DIR}/filters)
 target_include_directories(webcachesim PUBLIC ../lib)
 
 find_package(libmongocxx REQUIRED)
