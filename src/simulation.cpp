@@ -41,9 +41,9 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
             }
 #endif
             it = params.erase(it);
-        } else if (it->first == "bloom_filter") {
-            bloom_filter = static_cast<bool>(stoi(it->second));
-            it = params.erase(it);
+//        } else if (it->first == "bloom_filter") {
+//            bloom_filter = static_cast<bool>(stoi(it->second));
+//            it = params.erase(it);
         } else if (it->first == "segment_window") {
             segment_window = stoull((it->second));
             ++it;
@@ -169,9 +169,9 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
     unordered_map <uint64_t, uint32_t> future_timestamps;
     vector <uint8_t> eviction_qualities;
     vector <uint16_t> eviction_logic_timestamps;
-    if (bloom_filter) {
-        filter = new AkamaiBloomFilter;
-    }
+//    if (bloom_filter) {
+//        filter = new AkamaiBloomFilter;
+//    }
 
     SimpleRequest *req;
     if (is_offline)

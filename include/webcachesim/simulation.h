@@ -50,8 +50,8 @@ public:
     /*
      * bloom filter
      */
-    bool bloom_filter = false;
-    AkamaiBloomFilter *filter;
+//    bool bloom_filter = false;
+//    AkamaiBloomFilter *filter;
 
     //=================================================================
     //simulation parameter
