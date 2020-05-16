@@ -96,6 +96,7 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
 
     // set admission filter
     if (params.count("filter_type")) {
+        auto filter_type = params["filter_type"];
         filter = move(Filter::create_unique(filter_type));
         if (filter == nullptr) {
             cerr << "filter type not implemented" << endl;
@@ -215,7 +216,10 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
         else
             req->reinit(id, size, seq, &extra_features);
 
-        auto should_filter = filter->should_filter(*req);
+        bool should_filter = false;
+        if (filter != nullptr){
+            should_filter = filter->should_filter(*req);
+        }
 
         // Different admission strategy depending on version
         if (version == 1) {
@@ -226,20 +230,20 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
                 update_metric_req(rt_byte_miss, rt_obj_miss, size);
                 byte_miss_filter += size;
             } else {
-                if (!cache->lookup(*req)) {
+                if (!webcache->lookup(*req)) {
                     update_metric_req(byte_miss, obj_miss, size);
                     update_metric_req(rt_byte_miss, rt_obj_miss, size);
-                    cache->admit(*req);
+                    webcache->admit(*req);
                 }
             }
         } else if (version == 2) {
-            // if does not exists in cache, it's a miss.
+            // if does not exists in webcache, it's a miss.
             // we only add if we should not filter the object.
-            if (!cache->lookup(*req)) {
+            if (!webcache->lookup(*req)) {
                 update_metric_req(byte_miss, obj_miss, size);
                 update_metric_req(rt_byte_miss, rt_obj_miss, size);
                 if (!should_filter) {
-                    cache->admit(*req);
+                    webcache->admit(*req);
                 }
             }
         } else {
