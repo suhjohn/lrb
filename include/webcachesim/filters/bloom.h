@@ -96,6 +96,10 @@ public:
         }
     }
 
+    int total_bytes_used() override {
+        return 0;
+    }
+
     bool should_filter(SimpleRequest &req) override;
 
     size_t max_n_element = 40000000;

@@ -107,7 +107,6 @@ int main(int argc, char *argv[]) {
     // Output to local fs if desired
     auto results_dir = getenv("WEBCACHESIM_RESULT_DIR");
     if (results_dir) {
-        cerr << "error: WEBCACHESIM_RESULT_DIR is not set. Set to the directory where results will be dumped" << endl;
         if (params.count("task_id")) {
             task_id = params["task_id"];
         } else {
