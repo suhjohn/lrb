@@ -91,7 +91,7 @@ public:
         }
         cerr << "Init Bloom filter. max_n_element: " << max_n_element << " fp_rate: " << fp_rate << " k: " << k << endl;
         for (int i = 0; i < k; i++) {
-            bf::bloom_filter* b = new bf::basic_bloom_filter(fp_rate, max_n_element);
+            bf::basic_bloom_filter *b = new bf::basic_bloom_filter(fp_rate, max_n_element);
             filters.push_back(b);
         }
     }
@@ -103,7 +103,7 @@ public:
     uint16_t curr_filter_idx = 0;
     int n_added_obj = 0;
     int k = 2;
-    std::vector <bf::basic_bloom_filter> filters;
+    std::vector<bf::basic_bloom_filter *> filters;
 };
 
 static FilterFactory <BloomFilter> factoryBloomFilter("Bloom");
