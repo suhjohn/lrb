@@ -96,7 +96,6 @@ int main(int argc, char *argv[]) {
                           params);
     auto simulation_time = chrono::duration_cast<chrono::seconds>(chrono::system_clock::now() - timeBegin).count();
     auto simulation_timestamp = current_timestamp();
-nomongocxx::
     for (bsoncxx::document::element ele: res.view())
         value_builder.append(kvp(ele.key(), ele.get_value()));
     value_builder.append(kvp("simulation_time", to_string(simulation_time)));
