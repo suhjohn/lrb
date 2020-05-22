@@ -14,6 +14,7 @@ while [[ 1 ]]; do
       echo "pulling"
       git pull
       pip3 install -r /proj/cops-PG0/workspaces/ssuh/lrb/pywebcachesim/requirements.txt
+      /proj/cops-PG0/workspaces/ssuh/lrb/setup.sh
       python3 /proj/cops-PG0/workspaces/ssuh/lrb/script/run.py
   elif [ $REMOTE = $BASE ]; then
       echo "Need to push"
