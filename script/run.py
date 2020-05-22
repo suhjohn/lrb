@@ -1,5 +1,3 @@
-import yaml
-from pygit2 import Repository
 import subprocess
 import os
 
