@@ -1,16 +1,14 @@
 debug: false
 dbcollection: simulation
 enable_trace_format_check: 0
-segment_window: 1000000
-real_time_segment_window: 600
 uni_size: 0
 
 nodes:
-  - "1/:"
+  - "1/ssh -p 22 ssuh@clnode159.clemson.cloudlab.us"
 
 trace_files:
   - wiki2018.tr
 
 cache_types:
-  - LRB
+  - LRU
 

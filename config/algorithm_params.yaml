@@ -1,7 +1,3 @@
-LRU:
-  bloom_filter:
-    - 0
-    - 1
 LRUK:
   k: 4
 LR:
