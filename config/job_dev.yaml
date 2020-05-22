@@ -1,5 +1,5 @@
 debug: false
-dbcollection: dev
+dbcollection: simulation
 enable_trace_format_check: 0
 segment_window: 1000000
 real_time_segment_window: 600

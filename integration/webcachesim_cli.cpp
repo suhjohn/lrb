@@ -89,14 +89,14 @@ int main(int argc, char *argv[]) {
         value_builder.append(kvp(ele.key(), ele.get_value()));
 
 
-    mongocxx::instance inst;
+    mongocxx::instance inst{};
 
     auto timeBegin = chrono::system_clock::now();
     auto res = simulation(string(webcachesim_trace_dir) + '/' + argv[1], argv[2], std::stoull(argv[3]),
                           params);
     auto simulation_time = chrono::duration_cast<chrono::seconds>(chrono::system_clock::now() - timeBegin).count();
     auto simulation_timestamp = current_timestamp();
-
+nomongocxx::
     for (bsoncxx::document::element ele: res.view())
         value_builder.append(kvp(ele.key(), ele.get_value()));
     value_builder.append(kvp("simulation_time", to_string(simulation_time)));
@@ -119,8 +119,8 @@ int main(int argc, char *argv[]) {
     }
 
     try {
-        mongocxx::client client = mongocxx::client{mongocxx::uri(params["dburi"])};
-        auto db = client[mongocxx::uri(params["dburi"]).database()];
+        mongocxx::client client{mongocxx::uri(params["dburi"])};
+        mongocxx::database db = client["webcachesim"];
         mongocxx::options::replace option;
         db[params["dbcollection"]].replace_one(key_builder.extract(), value_builder.extract(), option.upsert(true));
     } catch (const std::exception &xcp) {
