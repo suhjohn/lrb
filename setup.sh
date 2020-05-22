@@ -19,14 +19,14 @@ cd ../../..
 sudo apt-get install -y cmake libssl-dev libsasl2-dev
 
 # installing mongo c
-cd lib/mongo-c-driver-1.13.1/cmake-build/
+cd lib/mongo-c-driver-1.15.0/cmake-build/
 cmake -DENABLE_AUTOMATIC_INIT_AND_CLEANUP=OFF ..
 make -j8
 sudo make install
 cd ../../..
 
 # installing mongo-cxx
-cd lib/mongo-cxx-driver-r3.4.0/build
+cd lib/mongo-cxx-driver-r3.5.0/build
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
 sudo make -j8
 sudo make install
