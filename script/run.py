@@ -51,7 +51,8 @@ def run():
             prev_hostnames = json.load(f)
         diff_host_names = list(set(hostnames) - set(prev_hostnames))
     except FileNotFoundError: # case when invoked for the first time on the NFS node
-        diff_host_names = hostnames
+        diff_host_names = list(set(hostnames)) # removing duplcates in case
+
     def _setup(hostname):
         command = f"ssh -o StrictHostKeyChecking=no {hostname} 'cd lrb; ./setup.sh'"
         proc = subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
