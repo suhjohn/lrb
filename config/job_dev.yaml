@@ -1,14 +1,8 @@
-debug: false
 dbcollection: simulation
 enable_trace_format_check: 0
 uni_size: 0
-
-nodes:
-  - "1/ssh -p 22 ssuh@clnode159.clemson.cloudlab.us"
-
 trace_files:
-  - wiki2018.tr
-
+  - memc_200m.tr
 cache_types:
   - LRU
 

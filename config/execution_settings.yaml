@@ -1,0 +1,3 @@
+debug: false
+nodes:
+  - "1/ssh -p 22 ssuh@clnode159.clemson.cloudlab.us"

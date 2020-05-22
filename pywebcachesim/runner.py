@@ -14,15 +14,15 @@ def to_task_str(task: dict):
     task_id = str(int(time.time() * 1000000))
     # use timestamp as task id
     params['task_id'] = task_id
-    params = [f'--{k}={v}'for k, v in params.items()]
+    params = [f'--{k}={v}' for k, v in params.items()]
     params = ' '.join(params)
     res = f'webcachesim_cli {task["trace_file"]} {task["cache_type"]} {task["cache_size"]} {params}'
     return task_id, res
 
 
-def run(args: dict, tasks: list):
+def run(execution_settings: dict, tasks: list):
     # debug mode, only 1 task
-    if args["debug"]:
+    if execution_settings["debug"]:
         tasks = tasks[:1]
 
     ts = int(time.time())
@@ -38,11 +38,7 @@ def run(args: dict, tasks: list):
             f.write(task_str)
     with open(f'/tmp/{ts}.job') as f:
         command = ['parallel', '-v', '--eta', '--shuf', '--sshdelay', '0.1']
-        for n in args['nodes']:
+        for n in execution_settings['nodes']:
             command.extend(['-S', n])
         subprocess.run(command,
                        stdin=f)
-
-
-
-

@@ -32,10 +32,12 @@ def get_task(args):
     """
     # job config file
     with open(args['job_file']) as f:
-        file_params = yaml.load(f, Loader=yaml.FullLoader)
-    for k, v in file_params.items():
-        if args.get(k) is None:
-            args[k] = v
+        job_params = yaml.load(f, Loader=yaml.FullLoader)
+
+    assert "trace_files" in job_params, "trace_files not set in file params."
+    assert "cache_types" in job_params, "cache_types not set in file params."
+    trace_files = job_params['trace_files']
+    cache_types = job_params['cache_types']
 
     # load algorithm parameters
     assert args.get('algorithm_param_file') is not None
@@ -47,8 +49,8 @@ def get_task(args):
         trace_params = yaml.load(f, Loader=yaml.FullLoader)
 
     tasks = []
-    for trace_file in args['trace_files']:
-        for cache_type in args['cache_types']:
+    for trace_file in trace_files:
+        for cache_type in cache_types:
             for cache_size_or_size_parameters in trace_params[trace_file]['cache_sizes']:
                 # element can be k: v or k: list[v], which would be expanded with cartesian product
                 # priority: default < per trace < per trace per algorithm < per trace per algorithm per cache size
@@ -80,15 +82,10 @@ def get_task(args):
                         'cache_size': cache_size,
                         **parameters,
                     }
-                    for k, v in args.items():
+                    for k, v in job_params.items():
                         if k not in [
                             'cache_types',
                             'trace_files',
-                            'algorithm_param_file',
-                            'trace_param_file',
-                            'job_file',
-                            'debug',
-                            'nodes',
                         ] and v is not None:
                             task[k] = v
                     tasks.append(task)
