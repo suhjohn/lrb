@@ -1,12 +1,16 @@
+import json
 import subprocess
 import os
+from multiprocessing.pool import ThreadPool
+
+import yaml
 
 
 def run():
     webcachesim_root = os.environ.get("WEBCACHESIM_ROOT")
     if not webcachesim_root:
         raise Exception(
-            "WEBCACHESIM_ROOT is not set in the environment. WEBCACHESIM_ROOTis required for simulation execution.")
+            "WEBCACHESIM_ROOT is not set in the environment. WEBCACHESIM_ROOT is required for simulation execution.")
     dburi = os.environ.get("DBURI")
     if not dburi:
         raise Exception(
@@ -29,6 +33,35 @@ def run():
     if not os.path.exists(execution_settings_file):
         raise Exception(
             f"execution settings file does not exist in the designated config path: {execution_settings_file}")
+
+    # HACK: We want to call setup.sh only when new nodes are added to the execution setting.
+    #       We do this by keeping a temp list of hostnames of the previous execution and finding their diff
+    with open(execution_settings_file) as f:
+        execution_settings = yaml.load(f, Loader=yaml.FullLoader)
+    nodes = execution_settings["nodes"]
+    # nodes are in the following format: 1/ssh -p 22 ssuh@clnode035.clemson.cloudlab.us
+    # we want to extract 'ssuh@clnode035.clemson.cloudlab.us'
+    hostnames = []
+    for node in nodes:
+        node_ssh_cmd = node.split("/")[-1]
+        node_name = node_ssh_cmd.split(" ")[-1]
+        hostnames.append(node_name)
+    try:
+        with open(f'{webcachesim_root}/script/temp_hostnames.json', 'r') as f:
+            prev_hostnames = json.load(f)
+        diff_host_names = list(set(hostnames) - set(prev_hostnames))
+    except FileNotFoundError: # case when invoked for the first time on the NFS node
+        diff_host_names = hostnames
+    def _setup(hostname):
+        command = f"ssh -o StrictHostKeyChecking=no {hostname} 'cd lrb; ./setup.sh'"
+        proc = subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
+        proc.wait()
+    pool = ThreadPool(30)
+    pool.map(_setup, diff_host_names)
+    pool.close()
+    pool.join()
+    with open(f'{webcachesim_root}/script/temp_hostnames.json', 'w') as f:
+        json.dump(hostnames, f)
 
     command = ['python3',
                f'{webcachesim_root}/pywebcachesim/simulate.py',
