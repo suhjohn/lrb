@@ -15,4 +15,3 @@ def parse_cmd_args():
     args = parser.parse_args()
 
     return vars(args)
-

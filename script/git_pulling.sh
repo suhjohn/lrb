@@ -1,8 +1,5 @@
 #!/bin/bash
 
-PYTHON='/home/zhenyus/anaconda3/envs/webcachesim_env/bin/python'
-RUNNER_FILE='/home/zhenyus/webcachesim/script/run.py'
-
 while [[ 1 ]]; do
   git remote update
   UPSTREAM=${1:-'@{u}'}
@@ -16,7 +13,8 @@ while [[ 1 ]]; do
       echo "Need to pull"
       echo "pulling"
       git pull
-      $PYTHON $RUNNER_FILE
+      pip3 install
+      python3 /proj/cops-PG0/workspaces/ssuh/lrb/script/run.py
   elif [ $REMOTE = $BASE ]; then
       echo "Need to push"
   else
