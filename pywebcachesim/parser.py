@@ -12,7 +12,7 @@ def parse_cmd_args():
     parser.add_argument('--trace_param_file', type=str, help='trace parameter config file', required=True)
     parser.add_argument('--execution_settings_file', type=str, required=True)
     args = parser.parse_args()
-    args = dict(args)
+    args = vars(args)
     with open(args['job_file']) as f:
         job_params = yaml.load(f, Loader=yaml.FullLoader)
     with open(args['algorithm_param_file']) as f:
