@@ -1,3 +1,3 @@
 debug: false
 nodes:
-  - "1/ssh -p 22 ssuh@clnode035.clemson.cloudlab.us"
+  - "1/ssh -p 22 ssuh@clnode143.clemson.cloudlab.us"
