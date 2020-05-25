@@ -2,7 +2,7 @@ dbcollection: simulation
 enable_trace_format_check: 0
 uni_size: 0
 trace_files:
-  - memc_200m.tr
+  - memc_200m_100.tr
 cache_types:
   - LRU
 
