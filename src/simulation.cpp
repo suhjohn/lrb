@@ -82,18 +82,6 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
         exit(-1);
     }
 
-    //set cache_type related
-    // create cache
-    webcache = move(Cache::create_unique(cache_type));
-    if (webcache == nullptr) {
-        cerr << "cache type not implemented" << endl;
-        abort();
-    }
-    // configure cache size
-    webcache->setSize(cache_size);
-
-    webcache->init_with_params(params);
-
     // set admission filter
     if (params.count("filter_type")) {
         auto filter_type = params["filter_type"];
@@ -103,7 +91,21 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
             abort();
         }
         filter->init_with_params(params);
+        cerr << "Subtracting filter size " << filter->total_bytes_used() << " bytes from cache size" << endl;
+        cache_size -= filter->total_bytes_used();
     }
+
+    //set cache_type related
+    // create cache
+    webcache = move(Cache::create_unique(cache_type));
+    if (webcache == nullptr) {
+        cerr << "cache type not implemented" << endl;
+        abort();
+    }
+    // configure cache size
+    webcache->setSize(cache_size);
+    webcache->init_with_params(params);
+
     if (params.count("version")) {
         version = stoi(params["version"]);
     }

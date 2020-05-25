@@ -96,8 +96,12 @@ public:
         }
     }
 
-    int total_bytes_used() override {
-        return 0;
+    size_t total_bytes_used() override {
+        size_t total = 0;
+        for (int i = 0; i < k; i++) {
+            total += filters[i]->storage().size();
+        }
+        return total / 8;
     }
 
     bool should_filter(SimpleRequest &req) override;

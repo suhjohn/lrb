@@ -31,7 +31,7 @@ public:
     virtual bool should_filter(SimpleRequest &req) = 0;
 
     // returns the total bytes used for the filter
-    virtual int total_bytes_used() = 0;
+    virtual size_t total_bytes_used() = 0;
 
     // helper functions (factory pattern)
     static void registerType(std::string name, IFilterFactory *factory) {
