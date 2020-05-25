@@ -71,7 +71,8 @@ def run():
                '--job_file', job_file,
                '--algorithm_param_file', algorithm_param_file,
                '--trace_param_file', trace_param_file,
-               '--execution_settings_file', execution_settings_file
+               '--execution_settings_file', execution_settings_file,
+               '> ~/simulate.py.log'
                ]
 
     subprocess.run(command)
