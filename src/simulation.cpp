@@ -95,6 +95,10 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
         cerr << "Subtracting filter size " << filter->total_bytes_used() << " bytes from cache size" << endl;
         total_bytes_used = filter->total_bytes_used();
     }
+    if (total_bytes_used > cache_size) {
+        cerr << "filter size is greater than available memory!" << endl;
+        abort();
+    }
 
     //set cache_type related
     // create cache
