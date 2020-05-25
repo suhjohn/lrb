@@ -7,6 +7,7 @@ import yaml
 
 
 def run():
+    print("Running run.py")
     webcachesim_root = os.environ.get("WEBCACHESIM_ROOT")
     if not webcachesim_root:
         raise Exception(
