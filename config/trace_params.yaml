@@ -15,6 +15,5 @@ memc_200m_100.tr:
     - 100000000
     - 200000000
     - 300000000
-    - 400000000
   real_time_segment_window: 600000000
   segment_window: 1000000
