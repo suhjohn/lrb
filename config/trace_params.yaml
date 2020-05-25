@@ -13,5 +13,6 @@ wiki2018.tr:
 memc_200m.tr:
   cache_sizes:
     - 100000000
+    - 200000000
   real_time_segment_window: 600000000
   segment_window: 1000000
