@@ -61,6 +61,7 @@ def run():
     pool.map(_setup, diff_host_names)
     pool.close()
     pool.join()
+
     with open(f'{webcachesim_root}/script/temp_hostnames.json', 'w') as f:
         json.dump(hostnames, f)
 

@@ -22,9 +22,6 @@ def to_task_str(task: dict):
 
 def run(execution_settings: dict, tasks: list):
     # debug mode, only 1 task
-    if execution_settings["debug"]:
-        tasks = tasks[:1]
-
     ts = int(time.time())
     print(f'n_task: {len(tasks)}\n '
           f'generating job file to /tmp/{ts}.job')
