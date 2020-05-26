@@ -177,8 +177,8 @@ class KHitCounter {
 public:
     uint64_t second_hit_byte, unevicted_kth_hit_byte, evicted_kth_hit_byte;
     KHitCounter(const std::map <std::string, std::string> &params) {
-        CountingSetFilter _filter();
-        filter = &filter;
+        CountingSetFilter _filter;
+        filter = &_filter;
         filter->init_with_params(params);
     }
 
