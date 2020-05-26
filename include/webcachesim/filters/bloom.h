@@ -170,7 +170,7 @@ public:
     std::vector <unordered_map<uint64_t, uint64_t>> filters;
 };
 
-static FilterFactory <CountingSetFilter> factoryBloomFilter("CountingSet");
+static FilterFactory <CountingSetFilter> factoryCountingSetFilter("CountingSet");
 
 class KHitCounter {
     CountingSetFilter filter;

@@ -14,7 +14,6 @@
 #include <numeric>
 #include "bsoncxx/builder/basic/document.hpp"
 #include "bsoncxx/json.hpp"
-#include "filters/bloom.h"
 
 using namespace std;
 using namespace chrono;

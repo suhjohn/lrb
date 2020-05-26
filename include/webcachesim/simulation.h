@@ -15,7 +15,7 @@
 #include "filter.h"
 #include "bsoncxx/document/view.hpp"
 #include "bloom_filter.h"
-
+#include "filters/bloom.h"
 
 /*
  * single thread simulation. Returns results.
