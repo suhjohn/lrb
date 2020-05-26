@@ -173,20 +173,21 @@ public:
 static FilterFactory <CountingSetFilter> factoryCountingSetFilter("CountingSet");
 
 class KHitCounter {
-    CountingSetFilter filter;
+    CountingSetFilter *filter;
 public:
     uint64_t second_hit_byte, unevicted_kth_hit_byte, evicted_kth_hit_byte;
     KHitCounter(const std::map <std::string, std::string> &params) {
-        filter = CountingSetFilter();
-        filter.init_with_params(params);
+        CountingSetFilter _filter();
+        filter = &filter;
+        filter->init_with_params(params);
     }
 
     void insert(SimpleRequest &req) {
-        filter.should_filter(req);
+        filter->should_filter(req);
     }
 
     uint64_t count(SimpleRequest &req) {
-        return filter.count(req);
+        return filter->count(req);
     }
 
     uint64_t update_second_hit(uint64_t size) {
