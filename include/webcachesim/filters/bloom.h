@@ -9,7 +9,9 @@
 #include <sstream>
 #include <vector>
 #include <unordered_set>
+#include <unordered_map>
 #include <bf/bloom_filter/basic.hpp>
+#include <bf/bloom_filter/counting.hpp>
 #include "filter.h"
 
 using namespace std;
@@ -111,9 +113,94 @@ public:
     uint16_t curr_filter_idx = 0;
     int n_added_obj = 0;
     int k = 2;
+
     std::vector<bf::basic_bloom_filter *> filters;
 };
 
 static FilterFactory <BloomFilter> factoryBloomFilter("Bloom");
+
+class CountingSetFilter : public Filter {
+public:
+    CountingSetFilter() : Filter() {}
+
+    void init_with_params(const std::map <std::string, std::string> &params) override {
+        for (auto &it: params) {
+            if (it.first == "max_n_element") {
+                std::istringstream iss(it.second);
+                size_t new_n;
+                iss >> new_n;
+                max_n_element = new_n;
+            } else if (it.first == "bloom_k") {
+                k = stoi(it.second);
+            } else {
+                cerr << "CountingSetFilter filter unrecognized parameter: " << it.first << endl;
+            }
+        }
+        cerr << "Init Bloom filter. max_n_element: " << max_n_element << " k: " << k << endl;
+
+        for (int i = 0; i < k; i++) {
+            unordered_map <uint64_t, uint64_t> filter;
+            filters.push_back(filter);
+        }
+    }
+
+    uint64_t count(SimpleRequest &req) {
+        auto key = req.get_id();
+        for (int i = 0; i < k; i++) {
+            if (filters[i].count(key)) {
+                return filters[i][key];
+            }
+        }
+        return 0;
+    }
+
+    size_t total_bytes_used() override {
+        return 0;
+    }
+
+    bool should_filter(SimpleRequest &req) override;
+
+    size_t max_n_element = 40000000;
+    double fp_rate = 0.001;
+    uint16_t curr_filter_idx = 0;
+    int n_added_obj = 0;
+    int k = 2;
+    bool track_kth_hit = false;
+
+    std::vector <unordered_map<uint64_t, uint64_t>> filters;
+};
+
+static FilterFactory <CountingSetFilter> factoryBloomFilter("CountingSet");
+
+class KHitCounter {
+    CountingSetFilter filter;
+public:
+    uint64_t second_hit_byte, unevicted_kth_hit_byte, evicted_kth_hit_byte;
+    KHitCounter(const std::map <std::string, std::string> &params) {
+        filter = CountingSetFilter();
+        filter.init_with_params(params);
+    }
+
+    void insert(SimpleRequest &req) {
+        filter.should_filter(req);
+    }
+
+    uint64_t count(SimpleRequest &req) {
+        return filter.count(req);
+    }
+
+    uint64_t update_second_hit(uint64_t size) {
+        second_hit_byte += size;
+    }
+
+    uint64_t update_unevicted_kth(uint64_t size) {
+        unevicted_kth_hit_byte += size;
+    }
+
+    uint64_t update_evicted_kth(uint64_t size) {
+        evicted_kth_hit_byte += size;
+    }
+
+};
 
 #endif //LRB_BLOOM_H

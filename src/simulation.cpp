@@ -14,6 +14,7 @@
 #include <numeric>
 #include "bsoncxx/builder/basic/document.hpp"
 #include "bsoncxx/json.hpp"
+#include "filters/bloom.h"
 
 using namespace std;
 using namespace chrono;
@@ -59,6 +60,9 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
         } else if (it->first == "seq_start") {
             seq_start = stoll((it->second));
             ++it;
+        } else if (it->first == "bloom_track_k_hit") {
+            int _val = stoi(it->second);
+            bloom_track_k_hit = _val != 0;
         } else {
             ++it;
         }
@@ -80,6 +84,10 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
     if (!infile) {
         cerr << "Exception opening/reading file " << _trace_file << endl;
         exit(-1);
+    }
+
+    if (bloom_track_k_hit) {
+        kHitCounter = &KHitCounter(params);
     }
 
     // set admission filter
@@ -131,7 +139,6 @@ void FrameWork::adjust_real_time_offset() {
     infile.clear();
     infile.seekg(0, ios::beg);
 }
-
 
 void FrameWork::update_real_time_stats() {
     rt_seg_byte_miss.emplace_back(rt_byte_miss);
@@ -224,7 +231,7 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
             req->reinit(id, size, seq, &extra_features);
 
         bool should_filter = false;
-        if (filter != nullptr){
+        if (filter != nullptr) {
             should_filter = filter->should_filter(*req);
         }
 
@@ -246,11 +253,22 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
         } else if (version == 2) {
             // if does not exists in webcache, it's a miss.
             // we only add if we should not filter the object.
-            if (!webcache->lookup(*req)) {
+            auto lookup = webcache->lookup(*req);
+            if (!lookup) {
                 update_metric_req(byte_miss, obj_miss, size);
                 update_metric_req(rt_byte_miss, rt_obj_miss, size);
                 if (!should_filter) {
                     webcache->admit(*req);
+                }
+            }
+            if (bloom_track_k_hit) {
+                kHitCounter->insert(*req);
+                if (kHitCounter->count(*req) == 2) {
+                    kHitCounter->update_second_hit(*req);
+                } else if (!lookup && kHitCounter->count(*req) > 2) {
+                    kHitCounter->update_evicted_kth(*req);
+                } else if (lookup && kHitCounter->count(*req) > 2) {
+                    kHitCounter->update_unevicted_kth(*req);
                 }
             }
         } else {
@@ -324,7 +342,11 @@ bsoncxx::builder::basic::document FrameWork::simulation_results() {
         for (const auto &element : rt_seg_rss)
             child.append(element);
     }));
-
+    if (bloom_track_k_hit) {
+        value_builder.append(kvp("second_hit_byte", Int64(kHitCounter->second_hit_byte)));
+        value_builder.append(kvp("unevicted_kth_hit_byte", Int64(kHitCounter->unevicted_kth_hit_byte)));
+        value_builder.append(kvp("evicted_kth_hit_byte", Int64(kHitCounter->evicted_kth_hit_byte)));
+    }
     webcache->update_stat(value_builder);
     return value_builder;
 }
