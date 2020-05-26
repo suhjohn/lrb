@@ -343,9 +343,9 @@ bsoncxx::builder::basic::document FrameWork::simulation_results() {
             child.append(element);
     }));
     if (bloom_track_k_hit) {
-        value_builder.append(kvp("second_hit_byte", static_cast<long long>(kHitCounter->second_hit_byte)));
-        value_builder.append(kvp("unevicted_kth_hit_byte", static_cast<long long>(kHitCounter->unevicted_kth_hit_byte)));
-        value_builder.append(kvp("evicted_kth_hit_byte", static_cast<long long>(kHitCounter->evicted_kth_hit_byte)));
+        value_builder.append(kvp("second_hit_byte", static_cast<int64_t>(kHitCounter->second_hit_byte)));
+        value_builder.append(kvp("unevicted_kth_hit_byte", static_cast<int64_t>(kHitCounter->unevicted_kth_hit_byte)));
+        value_builder.append(kvp("evicted_kth_hit_byte", static_cast<int64_t>(kHitCounter->evicted_kth_hit_byte)));
     }
     webcache->update_stat(value_builder);
     return value_builder;
