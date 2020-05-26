@@ -68,6 +68,7 @@ def run():
 
     command = f"python3 {webcachesim_root}/pywebcachesim/simulate.py --dburi {dburi} --job_file {job_file} --algorithm_param_file {algorithm_param_file} " \
               f"--trace_param_file {trace_param_file} --execution_settings_file {execution_settings_file} > ~/simulate_script.log 2&>1 &; disown"
+    print(command)
     subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
 
 
