@@ -1,2 +1,4 @@
 nodes:
-- 8/ssh -p 22 ssuh@clnode046.clemson.cloudlab.us
+- 8/ssh -p 22 ssuh@clnode090.clemson.cloudlab.us
+- 8/ssh -p 22 ssuh@clnode059.clemson.cloudlab.us
+- 8/ssh -p 22 ssuh@clnode060.clemson.cloudlab.us
