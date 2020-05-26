@@ -86,7 +86,8 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
     }
 
     if (bloom_track_k_hit) {
-        kHitCounter = &KHitCounter(params);
+        KHitCounter _kHitCounter(params);
+        kHitCounter = &_kHitCounter;
     }
 
     // set admission filter
@@ -263,11 +264,11 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
             if (bloom_track_k_hit) {
                 kHitCounter->insert(*req);
                 if (kHitCounter->count(*req) == 2) {
-                    kHitCounter->update_second_hit(*req);
+                    kHitCounter->update_second_hit(size);
                 } else if (!lookup && kHitCounter->count(*req) > 2) {
-                    kHitCounter->update_evicted_kth(*req);
+                    kHitCounter->update_evicted_kth(size);
                 } else if (lookup && kHitCounter->count(*req) > 2) {
-                    kHitCounter->update_unevicted_kth(*req);
+                    kHitCounter->update_unevicted_kth(size);
                 }
             }
         } else {
@@ -342,9 +343,9 @@ bsoncxx::builder::basic::document FrameWork::simulation_results() {
             child.append(element);
     }));
     if (bloom_track_k_hit) {
-        value_builder.append(kvp("second_hit_byte", Int64(kHitCounter->second_hit_byte)));
-        value_builder.append(kvp("unevicted_kth_hit_byte", Int64(kHitCounter->unevicted_kth_hit_byte)));
-        value_builder.append(kvp("evicted_kth_hit_byte", Int64(kHitCounter->evicted_kth_hit_byte)));
+        value_builder.append(kvp("second_hit_byte", static_cast<long long>(kHitCounter->second_hit_byte)));
+        value_builder.append(kvp("unevicted_kth_hit_byte", static_cast<long long>(kHitCounter->unevicted_kth_hit_byte)));
+        value_builder.append(kvp("evicted_kth_hit_byte", static_cast<long long>(kHitCounter->evicted_kth_hit_byte)));
     }
     webcache->update_stat(value_builder);
     return value_builder;
