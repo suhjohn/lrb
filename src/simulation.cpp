@@ -87,7 +87,7 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
     }
 
     if (bloom_track_k_hit) {
-        KHitCounter _kHitCounter(params);
+        KHitCounter _kHitCounter{params};
         kHitCounter = &_kHitCounter;
     }
 
