@@ -182,4 +182,5 @@ dmypy.json
 
 # End of https://www.gitignore.io/api/python
 
+config/execution_settings.yaml
 script/temp_hostnames.json
