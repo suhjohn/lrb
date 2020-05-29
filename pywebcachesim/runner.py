@@ -1,6 +1,6 @@
 import time
 import subprocess
-
+import uuid
 
 def to_task_str(task: dict):
     """
@@ -21,21 +21,23 @@ def to_task_str(task: dict):
 
 
 def run(execution_settings: dict, tasks: list):
-    # debug mode, only 1 task
-    ts = int(time.time())
-    print(f'n_task: {len(tasks)}\n '
-          f'generating job file to /tmp/{ts}.job')
-    with open(f'/tmp/{ts}.job', 'w') as f:
+    ts = str(uuid.uuid4().hex)
+    job_file = f"/tmp/{ts}.job"
+    log_file = f"/tmp/{ts}.log"
+    with open(log_file, 'w') as f:
+        f.write(f'n_task:{len(tasks)}\njob_file:{job_file}')
+    with open(job_file, 'w') as f:
         for i, task in enumerate(tasks):
             task_id, task_str = to_task_str(task)
-            # f.write(task_str+f' &> /tmp/{ts}.log\n')
             task_str = f'bash --login -c "{task_str}" &> /tmp/{task_id}.log\n'
-            if i == 0:
-                print(f'first task: {task_str}')
             f.write(task_str)
-    with open(f'/tmp/{ts}.job') as f:
-        command = ['parallel', '-v', '--eta', '--shuf', '--sshdelay', '0.1']
-        for n in execution_settings['nodes']:
-            command.extend(['-S', n])
-        subprocess.run(command,
-                       stdin=f)
+
+    with open(log_file, "w") as log_file_p:
+        with open(job_file) as f:
+            command = ['parallel', '-v', '--eta', '--shuf', '--sshdelay', '0.1']
+            for n in execution_settings['nodes']:
+                command.extend(['-S', n])
+            subprocess.run(command,
+                           stdout=log_file_p,
+                           stderr=log_file_p,
+                           stdin=f)

@@ -5,4 +5,7 @@ trace_files:
   - wiki2019.tr
 cache_types:
   - LRU
-
+  - LFUDA
+  - LURK
+  - GDSF
+  - LeCaR
