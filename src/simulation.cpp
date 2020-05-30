@@ -107,7 +107,7 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
         cerr << "filter size is greater than available memory!" << endl;
         abort();
     }
-
+    _cache_size -= total_bytes_used;
     //set cache_type related
     // create cache
     webcache = move(Cache::create_unique(cache_type));
@@ -115,8 +115,9 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
         cerr << "cache type not implemented" << endl;
         abort();
     }
+
     // configure cache size
-    webcache->setSize(cache_size - total_bytes_used);
+    webcache->setSize(_cache_size);
     webcache->init_with_params(params);
 
     if (params.count("version")) {
