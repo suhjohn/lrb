@@ -75,6 +75,8 @@ wiki2018.tr:
   bloom_track_k_hit: 0
   version:
     - 2
+  filter_type:
+    - Bloom
 
 wiki2019.tr:
   cache_sizes:
@@ -153,3 +155,5 @@ wiki2019.tr:
   bloom_track_k_hit: 0
   version:
     - 2
+  filter_type:
+    - Bloom
