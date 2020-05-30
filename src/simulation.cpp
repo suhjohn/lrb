@@ -231,15 +231,14 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
         else
             req->reinit(id, size, seq, &extra_features);
 
-        bool should_filter = false;
-        if (filter != nullptr) {
-            should_filter = filter->should_filter(*req);
-        }
-
         // Different admission strategy depending on version
         if (version == 1) {
             // if we should filter the object, we do not even lookup in cache.
             // otherwise, we lookup in cache. If not exist, admit.
+            bool should_filter = false;
+            if (filter != nullptr) {
+                should_filter = filter->should_filter(*req);
+            }
             if (should_filter) {
                 update_metric_req(byte_miss, obj_miss, size);
                 update_metric_req(rt_byte_miss, rt_obj_miss, size);
@@ -258,6 +257,10 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
             if (!lookup) {
                 update_metric_req(byte_miss, obj_miss, size);
                 update_metric_req(rt_byte_miss, rt_obj_miss, size);
+                bool should_filter = false;
+                if (filter != nullptr) {
+                    should_filter = filter->should_filter(*req);
+                }
                 if (!should_filter) {
                     webcache->admit(*req);
                 }
