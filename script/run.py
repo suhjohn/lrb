@@ -100,7 +100,7 @@ class WebcachesimExecutor:
         self._send_telegram("[task_id] Setup complete")
 
         command = f"nohup {PYTHON} {WEBCACHESIM_ROOT}/pywebcachesim_v2/simulate.py " \
-                  f"--dburi {DBURI} " \ 
+                  f"--dburi {DBURI} " \
                   f"--algorithm_param_file {WEBCACHESIM_ROOT}/{self.config_dir}/algorithm_params.yaml " \
                   f"--execution_settings_file {WEBCACHESIM_ROOT}/{self.config_dir}/execution_settings.yaml " \
                   f"--job_file {WEBCACHESIM_ROOT}/{self.config_dir}/job_dev.yaml " \
