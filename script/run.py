@@ -88,13 +88,11 @@ class WebcachesimExecutor:
         task_id = str(uuid.uuid4().hex)
         self._send_telegram(f"[{task_id}] Start experiment")
         self._send_telegram(f"[{task_id}] Setup start")
-        with open(f'{WEBCACHESIM_ROOT}/{self.config_dir}/authentication.yaml', 'w') as f:
-            f.write(f"dburi: {self.dburi}")
 
         command = f'git submodule update --init --recursive'
         subprocess.run(command, cwd=WEBCACHESIM_ROOT, shell=True)
 
-        job_file = f"{WEBCACHESIM_ROOT}/{self.config_dir}/job_dev.yaml"
+        job_file = f"{WEBCACHESIM_ROOT}/{self.config_dir}/execution_settings.yaml"
         with open(job_file) as f:
             execution_settings = yaml.load(f, Loader=yaml.FullLoader)
         nodes = execution_settings["nodes"]
@@ -102,9 +100,10 @@ class WebcachesimExecutor:
         self._send_telegram("[task_id] Setup complete")
 
         command = f"nohup {PYTHON} {WEBCACHESIM_ROOT}/pywebcachesim_v2/simulate.py " \
-                  f"--authentication_file {WEBCACHESIM_ROOT}/{self.config_dir}/authentication.yaml " \
-                  f"--job_file {WEBCACHESIM_ROOT}/{self.config_dir}/job_dev.yaml " \
+                  f"--dburi {DBURI} " \ 
                   f"--algorithm_param_file {WEBCACHESIM_ROOT}/{self.config_dir}/algorithm_params.yaml " \
+                  f"--execution_settings_file {WEBCACHESIM_ROOT}/{self.config_dir}/execution_settings.yaml " \
+                  f"--job_file {WEBCACHESIM_ROOT}/{self.config_dir}/job_dev.yaml " \
                   f"--trace_param_file {WEBCACHESIM_ROOT}/{self.config_dir}/trace_params.yaml " \
                   f"--pywebcachesim_task_id {task_id} & disown"
         self._send_telegram("[task_id] Start simulation")

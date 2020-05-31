@@ -37,11 +37,8 @@ def to_task_str(task: dict):
     return task_id, res
 
 
-def run(args: dict, raw_tasks: list, pywebcachesim_task_id: str):
+def run(pywebcachesim_task_id, raw_tasks, execution_settings):
     # debug mode, only 1 task
-    if args["debug"]:
-        raw_tasks = raw_tasks[:1]
-
     log_file = f"/tmp/{pywebcachesim_task_id}--logfile.json"
 
     tasks = list()
@@ -51,9 +48,9 @@ def run(args: dict, raw_tasks: list, pywebcachesim_task_id: str):
         tasks.append((task_id, task_str))
 
     print(f"task_count: {len(tasks)}")
-    nodes = [node.split("/")[1] for node in args['nodes']]
+    nodes = [node.split("/")[1] for node in execution_settings['nodes']]
     max_node_available_cores = {
-        node.split("/")[1]: int(node.split("/")[0]) for node in args['nodes']
+        node.split("/")[1]: int(node.split("/")[0]) for node in execution_settings['nodes']
     }
     total_task_count = len(tasks)
     completed_task_count = 0
