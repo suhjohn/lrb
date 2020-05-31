@@ -261,18 +261,11 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
                 if (filter != nullptr) {
                     should_filter = filter->should_filter(*req);
                 }
+                if (bloom_track_k_hit) {
+                    kHitCounter->insert(*req);
+                }
                 if (!should_filter) {
                     webcache->admit(*req);
-                }
-            }
-            if (bloom_track_k_hit) {
-                kHitCounter->insert(*req);
-                if (kHitCounter->count(*req) == 2) {
-                    kHitCounter->update_second_hit(size);
-                } else if (!lookup && kHitCounter->count(*req) > 2) {
-                    kHitCounter->update_evicted_kth(size);
-                } else if (lookup && kHitCounter->count(*req) > 2) {
-                    kHitCounter->update_unevicted_kth(size);
                 }
             }
         } else {
@@ -348,7 +341,6 @@ bsoncxx::builder::basic::document FrameWork::simulation_results() {
     }));
     if (bloom_track_k_hit) {
         value_builder.append(kvp("second_hit_byte", kHitCounter->second_hit_byte));
-        value_builder.append(kvp("unevicted_kth_hit_byte", kHitCounter->unevicted_kth_hit_byte));
         value_builder.append(kvp("evicted_kth_hit_byte", kHitCounter->evicted_kth_hit_byte));
     }
     webcache->update_stat(value_builder);

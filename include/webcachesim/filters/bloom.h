@@ -136,7 +136,7 @@ public:
                 cerr << "CountingSetFilter filter unrecognized parameter: " << it.first << endl;
             }
         }
-        cerr << "Init Bloom filter. max_n_element: " << max_n_element << " k: " << k << endl;
+        cerr << "Init CountingSetFilter filter. max_n_element: " << max_n_element << " k: " << k << endl;
 
         for (int i = 0; i < k; i++) {
             unordered_map <uint64_t, uint64_t> filter;
@@ -175,33 +175,27 @@ static FilterFactory <CountingSetFilter> factoryCountingSetFilter("CountingSet")
 class KHitCounter {
 public:
     CountingSetFilter *filter;
+    BloomFilter *bloom_filter;
     int64_t second_hit_byte = 0, unevicted_kth_hit_byte = 0, evicted_kth_hit_byte = 0;
 
     KHitCounter(const std::map <std::string, std::string> &params) {
         filter = new CountingSetFilter();
+        bloom_filter = new BloomFilter();
         filter->init_with_params(params);
+        bloom_filter->init_with_params(params);
     }
 
     void insert(SimpleRequest &req) {
         filter->should_filter(req);
+        auto should_filter = bloom_filter->should_filter(req);
+        if (!should_filter) {
+            if (filter->count(req) == 2) {
+                second_hit_byte += size;
+            } else if (filter->count(req) > 2) {
+                evicted_kth_hit_byte += size;
+            }
+        }
     }
-
-    uint64_t count(SimpleRequest &req) {
-        return filter->count(req);
-    }
-
-    void update_second_hit(uint64_t size) {
-        second_hit_byte += size;
-    }
-
-    void update_unevicted_kth(uint64_t size) {
-        unevicted_kth_hit_byte += size;
-    }
-
-    void update_evicted_kth(uint64_t size) {
-        evicted_kth_hit_byte += size;
-    }
-
 };
 
 #endif //LRB_BLOOM_H

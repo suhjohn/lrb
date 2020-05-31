@@ -13,7 +13,7 @@ while [[ 1 ]]; do
       echo "Need to pull"
       echo "pulling"
       git pull
-      pip3 install -r ~/lrb/pywebcachesim/requirements.txt
+      pip3 install -r $WEBCACHESIM_ROOT/pywebcachesim_v2/requirements.txt
       python3 ~/lrb/script/run.py 2>&1 &
       disown
   elif [ $REMOTE = $BASE ]; then
