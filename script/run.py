@@ -81,6 +81,7 @@ class WebcachesimExecutor:
         pool.join()
 
         pool = ThreadPool(30)
+        pool.map(_build, diff_host_names)
         pool.close()
         pool.join()
 
