@@ -65,7 +65,10 @@ class WebcachesimExecutor:
         def _setup(hostname):
             command = f"ssh -o StrictHostKeyChecking=no {hostname} 'cd {WEBCACHESIM_ROOT}; ./setup.sh'"
             p = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-            return p.stdout.decode()
+            try:
+                return p.stdout.decode()
+            except:
+                return p.stdout
 
         def _build(hostname):
             command = f"ssh -o StrictHostKeyChecking=no {hostname} 'cd {WEBCACHESIM_ROOT}; ./build.sh'"
