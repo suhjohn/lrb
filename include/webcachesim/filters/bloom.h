@@ -186,6 +186,7 @@ public:
     }
 
     void insert(SimpleRequest &req) {
+        auto size = req.get_size();
         filter->should_filter(req);
         auto should_filter = bloom_filter->should_filter(req);
         if (!should_filter) {
