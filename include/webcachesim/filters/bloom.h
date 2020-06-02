@@ -199,4 +199,30 @@ public:
     }
 };
 
+class FPCounter {
+    CountingSetFilter *filter;
+    BloomFilter *bloom_filter;
+    int64_t false_positive = 0, true_positive = 0;
+
+    FPCounter(const std::map <std::string, std::string> &params) {
+        filter = new CountingSetFilter();
+        bloom_filter = new BloomFilter();
+        filter->init_with_params(params);
+        bloom_filter->init_with_params(params);
+    }
+
+    void insert(SimpleRequest &req) {
+        auto size = req.get_size();
+        filter->should_filter(req);
+        auto should_filter = bloom_filter->should_filter(req);
+        if (!should_filter) {
+            if (filter->count(req) == 0) {
+                false_positive += 0;
+            } else {
+                true_positive += 1;
+            }
+        }
+    }
+};
+
 #endif //LRB_BLOOM_H
