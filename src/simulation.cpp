@@ -63,7 +63,7 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
             int _val = stoi(it->second);
             bloom_track_k_hit = _val != 0;
             ++it;
-        } else if () {
+        } else if (it->first == "bloom_track_fp") {
             int _val = stoi(it->second);
             bloom_track_fp = _val != 0;
             ++it;
@@ -94,7 +94,7 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
         kHitCounter = new KHitCounter(params);
     }
     if (bloom_track_fp) {
-        FPCounter = new FPCounter(params);
+        fpCounter = new FPCounter(params);
     }
 
     // set admission filter
@@ -280,7 +280,7 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
                     kHitCounter->insert(*req);
                 }
                 if (bloom_track_fp) {
-                    FPCounter->insert(*req);
+                    fpCounter->insert(*req);
                 }
             }
         } else {
@@ -359,8 +359,8 @@ bsoncxx::builder::basic::document FrameWork::simulation_results() {
         value_builder.append(kvp("evicted_kth_hit_byte", kHitCounter->evicted_kth_hit_byte));
     }
     if (bloom_track_fp) {
-        value_builder.append(kvp("bloom_false_positive", FPCounter->second_hit_byte));
-        value_builder.append(kvp("bloom_true_positive", FPCounter->evicted_kth_hit_byte));
+        value_builder.append(kvp("bloom_false_positive", fpCounter->false_positive));
+        value_builder.append(kvp("bloom_true_positive", fpCounter->true_positive));
     }
     webcache->update_stat(value_builder);
     return value_builder;
