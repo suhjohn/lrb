@@ -14,7 +14,7 @@ while [[ 1 ]]; do
       echo "pulling"
       git pull
       pip3 install -r $WEBCACHESIM_ROOT/pywebcachesim_v2/requirements.txt
-      python3 ~/lrb/script/run.py 2>&1 &
+      nohup python3 ~/lrb/script/run.py 2>&1 &
       disown
   elif [ $REMOTE = $BASE ]; then
       echo "Need to push"

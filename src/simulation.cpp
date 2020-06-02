@@ -41,9 +41,9 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
             }
 #endif
             it = params.erase(it);
-//        } else if (it->first == "bloom_filter") {
-//            bloom_filter = static_cast<bool>(stoi(it->second));
-//            it = params.erase(it);
+        } else if (it->first == "bloom_filter") {
+            bloom_filter = static_cast<bool>(stoi(it->second));
+            it = params.erase(it);
         } else if (it->first == "segment_window") {
             segment_window = stoull((it->second));
             ++it;
@@ -99,7 +99,12 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
 
     // set admission filter
     uint64_t total_bytes_used = 0;
-    if (params.count("filter_type")) {
+    if (bloom_filter) {
+        filter = move(Filter::create_unique("Bloom"));
+        filter->init_with_params(params);
+        cerr << "Subtracting filter size " << filter->total_bytes_used() << " bytes from cache size" << endl;
+        total_bytes_used = filter->total_bytes_used();
+    } else if (params.count("filter_type")) {
         auto filter_type = params["filter_type"];
         filter = move(Filter::create_unique(filter_type));
         if (filter == nullptr) {

@@ -50,7 +50,7 @@ public:
     /*
      * bloom filter
      */
-//    bool bloom_filter = false;
+    bool bloom_filter = false;
 //    AkamaiBloomFilter *filter;
 
     //=================================================================

@@ -29,6 +29,7 @@ class WebcachesimExecutor:
         import telegram
         bot = telegram.Bot(token=self.telegram_api_key)
         size = 800
+        print(msg)
         if len(msg) > size:
             messages = [msg[start: start + size] for start in range(0, len(msg) - 1, size)]
             for message in messages:
@@ -146,3 +147,4 @@ class WebcachesimExecutor:
 if __name__ == '__main__':
     executor = WebcachesimExecutor("config", DBURI, TELEGRAM_API_KEY, TELEGRAM_CHAT_ID)
     executor.run()
+
