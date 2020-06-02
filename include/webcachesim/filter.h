@@ -30,6 +30,8 @@ public:
     // main filter management functions (to be defined by a policy)
     virtual bool should_filter(SimpleRequest &req) = 0;
 
+    virtual void update_stat(bsoncxx::v_noabi::builder::basic::document &doc) {}
+
     // returns the total bytes used for the filter
     virtual size_t total_bytes_used() = 0;
 

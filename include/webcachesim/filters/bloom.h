@@ -106,6 +106,13 @@ public:
         return total / 8;
     }
 
+    void update_stat(bsoncxx::v_noabi::builder::basic::document &doc) override {
+        doc.append(kvp("filter_size", std::to_string(total_bytes_used())));
+        doc.append(kvp("max_n_element", std::to_string(max_n_element)));
+        doc.append(kvp("fp_rate", std::to_string(fp_rate)));
+        doc.append(kvp("filter_k", k));
+    }
+
     bool should_filter(SimpleRequest &req) override;
 
     size_t max_n_element = 40000000;
@@ -158,10 +165,14 @@ public:
         return 0;
     }
 
+    void update_stat(bsoncxx::v_noabi::builder::basic::document &doc) override {
+        doc.append(kvp("max_n_element", std::to_string(max_n_element)));
+        doc.append(kvp("bloom_k", k));
+    }
+
     bool should_filter(SimpleRequest &req) override;
 
     size_t max_n_element = 40000000;
-    double fp_rate = 0.001;
     uint16_t curr_filter_idx = 0;
     int n_added_obj = 0;
     int k = 2;

@@ -354,6 +354,10 @@ bsoncxx::builder::basic::document FrameWork::simulation_results() {
         for (const auto &element : rt_seg_rss)
             child.append(element);
     }));
+    if (filter != nullptr) {
+        filter->update_stat(value_builder);
+        value_builder.append(kvp("subtracted_cache_size", to_string(_cache_size)));
+    }
     if (bloom_track_k_hit) {
         value_builder.append(kvp("second_hit_byte", kHitCounter->second_hit_byte));
         value_builder.append(kvp("evicted_kth_hit_byte", kHitCounter->evicted_kth_hit_byte));
