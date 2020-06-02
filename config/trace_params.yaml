@@ -73,6 +73,7 @@ wiki2018.tr:
   bloom_k:
     - 2
   bloom_track_k_hit: 1
+  bloom_track_fp: 1
   version:
     - 2
   filter_type:
@@ -153,6 +154,7 @@ wiki2019.tr:
   bloom_k:
     - 2
   bloom_track_k_hit: 1
+  bloom_track_fp: 1
   version:
     - 2
   filter_type:
