@@ -200,6 +200,7 @@ public:
 };
 
 class FPCounter {
+public:
     CountingSetFilter *filter;
     BloomFilter *bloom_filter;
     int64_t false_positive = 0, true_positive = 0;
