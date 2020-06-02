@@ -13,6 +13,11 @@
 #include <bf/bloom_filter/basic.hpp>
 #include <bf/bloom_filter/counting.hpp>
 #include "filter.h"
+#include "bsoncxx/builder/basic/document.hpp"
+#include "bsoncxx/json.hpp"
+
+using bsoncxx::builder::basic::kvp;
+using bsoncxx::builder::basic::sub_array;
 
 using namespace std;
 

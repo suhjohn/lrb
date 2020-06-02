@@ -9,6 +9,7 @@
 #include <string>
 #include <memory>
 #include "request.h"
+#include "bsoncxx/builder/basic/document.hpp"
 
 class Filter;
 
