@@ -76,12 +76,12 @@ class WebcachesimExecutor:
             p = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
             return p.stdout.decode()
 
-        pool = ThreadPool(30)
+        pool = ThreadPool(5)
         pool.map(_setup, diff_host_names)
         pool.close()
         pool.join()
 
-        pool = ThreadPool(30)
+        pool = ThreadPool(5)
         pool.map(_build, diff_host_names)
         pool.close()
         pool.join()
