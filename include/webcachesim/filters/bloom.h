@@ -230,15 +230,15 @@ public:
 
     void insert(SimpleRequest &req) {
         auto size = req.get_size();
-        filter->should_filter(req);
         auto should_filter = bloom_filter->should_filter(req);
         if (!should_filter) {
             if (filter->count(req) == 0) {
-                false_positive += 0;
+                false_positive += size;
             } else {
-                true_positive += 1;
+                true_positive += size;
             }
         }
+        filter->should_filter(req);
     }
 };
 
