@@ -115,7 +115,7 @@ public:
         doc.append(kvp("filter_size", std::to_string(total_bytes_used())));
         doc.append(kvp("max_n_element", std::to_string(max_n_element)));
         doc.append(kvp("fp_rate", std::to_string(fp_rate)));
-        doc.append(kvp("filter_k", k));
+        doc.append(kvp("bloom_k", k));
     }
 
     bool should_filter(SimpleRequest &req) override;
