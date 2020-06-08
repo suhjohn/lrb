@@ -92,6 +92,7 @@ def run(pywebcachesim_task_id, raw_tasks, execution_settings):
 
         with open(log_file, "w") as f:
             res = {
+                "task_id": pywebcachesim_task_id,
                 "completed_task_count": completed_task_count,
                 "total_task_count": total_task_count,
                 "node_statistics": node_statistics

@@ -50,7 +50,8 @@ bool IgnoringKHitBloomFilter::should_filter(SimpleRequest &req) {
     for (int i = 0; i < k; i++) {
         // we have most likely seen it before
         if (filters[i]->lookup(key)) {
-            bool _should_filter = true;
+            bool _should_filter;
+
             // if we've seen it once before(i.e. current hit is second hit)
             if (count_maps[i][key] == 1) {
                 _should_filter = false;
@@ -59,7 +60,7 @@ bool IgnoringKHitBloomFilter::should_filter(SimpleRequest &req) {
                 _should_filter = true;
             }
             count_maps[i][key] += 1;
-            return false;
+            return _should_filter;
         }
     }
     if (n_added_obj > max_n_element) {
