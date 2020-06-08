@@ -243,7 +243,7 @@ public:
     std::vector<bf::basic_bloom_filter *> filters;
 };
 
-static FilterFactory <IgnoringKHitBloomFilter> factoryBloomFilter("IgnoringKHitBloom");
+static FilterFactory <IgnoringKHitBloomFilter> factoryIgnoringKHitBloomFilter("IgnoringKHitBloom");
 
 
 
