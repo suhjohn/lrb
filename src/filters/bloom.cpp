@@ -77,3 +77,34 @@ bool IgnoringKHitBloomFilter::should_filter(SimpleRequest &req) {
     ++n_added_obj;
     return true;
 }
+
+bool ResettingBloomFilter::should_filter(SimpleRequest &req) {
+    auto key = req.get_id();
+    for (int i = 0; i < k; i++) {
+        if (filters[i]->lookup(key)) {
+            // if we've seen it once before(i.e. current hit is second hit)
+            if (seen_key_sets[i].find(key) != seen_key_sets[i].end()) {
+                // Removing seen so that next time request with same key comes but key still exists in filter,
+                //      it is ignored.
+                seen_key_sets[i].erase(seen_key_sets[i].find(key));
+                return false;
+            } else {
+                continue
+            }
+        }
+    }
+
+    if (n_added_obj > max_n_element) {
+        // clear the least recently used filter, which will now be our current filter
+        curr_filter_idx = (curr_filter_idx + 1) % k;
+        filters[curr_filter_idx]->clear();
+        seen_key_sets[curr_filter_idx].clear();
+        n_added_obj = 0;
+    }
+
+    filters[curr_filter_idx]->add(key);
+    seen_key_sets[curr_filter_idx].insert(key);
+    // keep track of number of requests for the current filter
+    ++n_added_obj;
+    return true;
+}

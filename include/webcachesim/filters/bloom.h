@@ -246,6 +246,63 @@ public:
 static FilterFactory <IgnoringKHitBloomFilter> factoryIgnoringKHitBloomFilter("IgnoringKHitBloom");
 
 
+class ResettingBloomFilter : public Filter {
+public:
+    ResettingBloomFilter() : Filter() {}
+
+    void init_with_params(const std::map <std::string, std::string> &params) override {
+        for (auto &it: params) {
+            if (it.first == "max_n_element") {
+                std::istringstream iss(it.second);
+                size_t new_n;
+                iss >> new_n;
+                max_n_element = new_n;
+            } else if (it.first == "bloom_k") {
+                k = stoi(it.second);
+            } else if (it.first == "fp_rate") {
+                fp_rate = stod(it.second);
+            } else {
+                cerr << "Bloom filter unrecognized parameter: " << it.first << endl;
+            }
+        }
+        cerr << "Init Bloom filter. max_n_element: " << max_n_element << " fp_rate: " << fp_rate << " k: " << k << endl;
+        for (int i = 0; i < k; i++) {
+            bf::basic_bloom_filter *b = new bf::basic_bloom_filter(fp_rate, max_n_element);
+            filters.push_back(b);
+            unordered_set <uint64_t> seen_key_set;
+            seen_key_sets.push_back(seen_key_set);
+        }
+    }
+
+    size_t total_bytes_used() override {
+        size_t total = 0;
+        for (int i = 0; i < k; i++) {
+            total += filters[i]->storage().size();
+        }
+        return total / 8;
+    }
+
+    void update_stat(bsoncxx::v_noabi::builder::basic::document &doc) override {
+        doc.append(kvp("filter_size", std::to_string(total_bytes_used())));
+        doc.append(kvp("max_n_element", std::to_string(max_n_element)));
+        doc.append(kvp("fp_rate", std::to_string(fp_rate)));
+        doc.append(kvp("bloom_k", k));
+    }
+
+    bool should_filter(SimpleRequest &req) override;
+
+    size_t max_n_element = 40000000;
+    double fp_rate = 0.001;
+    uint16_t curr_filter_idx = 0;
+    int n_added_obj = 0;
+    int k = 2;
+
+    std::vector <unordered_set<uint64_t>> seen_key_sets;
+    std::vector<bf::basic_bloom_filter *> filters;
+};
+
+static FilterFactory <ResettingBloomFilter> factoryResettingBloomFilter("ResettingBloom");
+
 
 class KHitCounter {
 public:
