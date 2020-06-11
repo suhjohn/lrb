@@ -80,6 +80,7 @@ bool IgnoringKHitBloomFilter::should_filter(SimpleRequest &req) {
 
 bool ResettingBloomFilter::should_filter(SimpleRequest &req) {
     auto key = req.get_id();
+    bool is_new = true;
     for (int i = 0; i < k; i++) {
         if (filters[i]->lookup(key)) {
             // if we've seen it once before(i.e. current hit is second hit)
@@ -88,7 +89,8 @@ bool ResettingBloomFilter::should_filter(SimpleRequest &req) {
                 //      it is ignored.
                 seen_key_sets[i].erase(seen_key_sets[i].find(key));
                 return false;
-            } else {
+            } else { // if seen more than once before(which is why it won't exist in the seen_keys)
+                is_new = false;
                 break;
             }
         }
@@ -105,6 +107,8 @@ bool ResettingBloomFilter::should_filter(SimpleRequest &req) {
     filters[curr_filter_idx]->add(key);
     seen_key_sets[curr_filter_idx].insert(key);
     // keep track of number of requests for the current filter
-    ++n_added_obj;
+    if (is_new) {
+        ++n_added_obj;
+    }
     return true;
 }
