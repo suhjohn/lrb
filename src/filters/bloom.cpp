@@ -34,7 +34,7 @@ bool SetFilter::should_filter(SimpleRequest &req) {
     if (n_added_obj > max_n_element) {
         // clear the least recently used filter, which will now be our current filter
         curr_filter_idx = (curr_filter_idx + 1) % k;
-        filters[curr_filter_idx]->clear();
+        filters[curr_filter_idx].clear();
         n_added_obj = 0;
     }
     filters[curr_filter_idx].insert(key);
