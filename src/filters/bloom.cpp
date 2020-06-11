@@ -89,7 +89,7 @@ bool ResettingBloomFilter::should_filter(SimpleRequest &req) {
                 seen_key_sets[i].erase(seen_key_sets[i].find(key));
                 return false;
             } else {
-                continue;
+                break;
             }
         }
     }
