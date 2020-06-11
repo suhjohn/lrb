@@ -38,7 +38,7 @@ public:
                 cerr << "Set filter unrecognized parameter: " << it.first << endl;
             }
         }
-        cerr << "Init Set filter. max_n_element: " << max_n_element << " fp_rate: " << fp_rate << " k: " << k << endl;
+        cerr << "Init Set filter. max_n_element: " << max_n_element << " k: " << k << endl;
         for (int i = 0; i < k; i++) {
             unordered_set <uint64_t> filter;
             filters.push_back(filter);
