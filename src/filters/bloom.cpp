@@ -122,7 +122,7 @@ bool ResettingBloomFilter::should_filter(SimpleRequest &req) {
     }
 
     filters[curr_filter_idx]->add(key);
-    count_maps[i][key] += 1;
+    count_maps[curr_filter_idx][key] += 1;
     ++n_added_obj;
     return true;
 }
