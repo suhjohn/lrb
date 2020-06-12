@@ -100,19 +100,16 @@ bool IgnoringKHitBloomFilter::should_filter(SimpleRequest &req) {
 
 bool ResettingBloomFilter::should_filter(SimpleRequest &req) {
     auto key = req.get_id();
-    bool is_new = true;
     for (int i = 0; i < k; i++) {
         if (filters[i]->lookup(key)) {
-            // if we've seen it once before(i.e. current hit is second hit)
-            if (seen_key_sets[i].find(key) != seen_key_sets[i].end()) {
-                // Removing seen so that next time request with same key comes but key still exists in filter,
-                //      it is ignored.
-                seen_key_sets[i].erase(seen_key_sets[i].find(key));
-                return false;
-            } else { // if seen more than once before(which is why it won't exist in the seen_keys)
-                is_new = false;
-                break;
+            bool should_filter;
+            if (count_maps[i][key] % 2 == 1) {
+                should_filter = false;
+            } else {
+                should_filter = true;
             }
+            count_maps[i][key] += 1;
+            return should_filter;
         }
     }
 
@@ -120,15 +117,12 @@ bool ResettingBloomFilter::should_filter(SimpleRequest &req) {
         // clear the least recently used filter, which will now be our current filter
         curr_filter_idx = (curr_filter_idx + 1) % k;
         filters[curr_filter_idx]->clear();
-        seen_key_sets[curr_filter_idx].clear();
+        count_maps[curr_filter_idx].clear();
         n_added_obj = 0;
     }
 
     filters[curr_filter_idx]->add(key);
-    seen_key_sets[curr_filter_idx].insert(key);
-    // keep track of number of requests for the current filter
-    if (is_new) {
-        ++n_added_obj;
-    }
+    count_maps[i][key] += 1;
+    ++n_added_obj;
     return true;
 }

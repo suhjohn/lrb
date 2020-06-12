@@ -259,8 +259,8 @@ public:
         for (int i = 0; i < k; i++) {
             bf::basic_bloom_filter *b = new bf::basic_bloom_filter(fp_rate, max_n_element);
             filters.push_back(b);
-            unordered_set <uint64_t> seen_key_set;
-            seen_key_sets.push_back(seen_key_set);
+            unordered_map <uint64_t, uint64_t> count_map;
+            count_maps.push_back(count_map);
         }
     }
 
@@ -287,7 +287,7 @@ public:
     int n_added_obj = 0;
     int k = 2;
 
-    std::vector <unordered_set<uint64_t>> seen_key_sets;
+    std::vector <unordered_map<uint64_t, uint64_t>> count_maps;
     std::vector<bf::basic_bloom_filter *> filters;
 };
 
