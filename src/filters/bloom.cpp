@@ -126,3 +126,4 @@ bool ResettingBloomFilter::should_filter(SimpleRequest &req) {
     ++n_added_obj;
     return true;
 }
+
