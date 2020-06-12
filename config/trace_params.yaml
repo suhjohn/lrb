@@ -84,6 +84,7 @@ wiki2018.tr:
   filter_type:
     - ResettingBloom
 
+
 wiki2019.tr:
   cache_sizes:
     - 68719476736
@@ -169,3 +170,4 @@ wiki2019.tr:
     - 2
   filter_type:
     - ResettingBloom
+
