@@ -59,7 +59,6 @@ ThS4LRU:
   t: 1073741824
 LRB:
   sample_rate: 64
-  memory_window: 10000000
   batch_size: 131072
   max_n_past_timestamps: 32
   num_iterations: 32
@@ -69,7 +68,7 @@ LRB:
   objective: byte_miss_ratio
   n_edc_feature: 10
   range_log: 1000000
-  version: opensource
+  version: static
 ParallelLRB:
   training_sample_interval: 64
   sample_rate: 64
