@@ -96,7 +96,7 @@ def _get_evaluation_task(trace_file, cache_type, cache_size, memory_window, para
         n_early_stop=str(n_early_stop),
         n_warmup=0,
         memory_window=str(memory_window),
-        version=parameters['version'],  # use version as a strong key
+        lrb_version=parameters['lrb_version'],  # use version as a strong key
         dburi=parameters["dburi"],
         dbcollection=parameters["dbcollection"],
     )
@@ -143,7 +143,7 @@ def get_tasks_per_cache_size(trace_file, cache_type, cache_size, parameters, arg
         # no cache size because may check smaller cache sizes
         n_early_stop=str(n_validation),
         n_warmup=n_warmup,
-        version=parameters['version'],  # use version as a strong key
+        lrb_version=parameters['lrb_version'],  # use version as a strong key
         dburi=parameters["dburi"],
         dbcollection=parameters["dbcollection"],
     )
