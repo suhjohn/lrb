@@ -9,4 +9,3 @@ LRB:
   objective: byte_miss_ratio
   n_edc_feature: 10
   range_log: 1000000
-  version: static

@@ -240,6 +240,7 @@ def main():
             break
         if args["debug"]:
             print(tasks)
+        print(tasks)
         runner.run(args, tasks)
 
 
