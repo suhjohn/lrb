@@ -370,7 +370,7 @@ public:
         // count object count until n_early_stop
         ifstream infile(trace_file);
         if (!infile) {
-            cerr << "Exception opening/reading file " << _trace_file << endl;
+            cerr << "Exception opening/reading file " << trace_file << endl;
             exit(-1);
         }
         int seq = 0;
