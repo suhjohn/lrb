@@ -357,8 +357,6 @@ public:
     int64_t n_early_stop;
     unordered_map <uint64_t, uint64_t> count_map;
     vector <int64_t> counter_buckets;
-    uint n_extra_fields = 0;
-    std::vector<uint16_t> extra_features;
     int bucket_count;
 
     AccessFrequencyCounter(
@@ -367,7 +365,7 @@ public:
         cerr << "init AccessFrequencyCounter" << endl;
         n_early_stop = _n_early_stop;
         bucket_count = _bucket_count;
-        n_extra_fields = _n_extra_fields;
+
         for (int i = 0; i < bucket_count; i++) {
             counter_buckets.push_back(0);
         }
@@ -380,6 +378,7 @@ public:
         }
         int seq = 0;
         uint64_t t, id, size;
+        auto extra_features = vector<uint16_t>(_n_extra_fields);
         while ((infile >> t >> id >> size) && seq != _n_early_stop) {
             for (int i = 0; i < n_extra_fields; ++i)
                 infile >> extra_features[i];
