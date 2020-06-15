@@ -306,7 +306,7 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
                 }
             } else {
                 if (track_cache_hit) {
-                    cache_hit_ofstream << seq << id << size << endl;
+                    cache_hit_ofstream << seq << " " << id << " " << size << endl;
                 }
             }
         } else {
