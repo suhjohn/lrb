@@ -94,7 +94,7 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
         exit(-1);
     }
     if (track_cache_hit) {
-        if (!params["cache_hit_result_dir"]) {
+        if (!params.count("cache_hit_result_dir")) {
             cerr << "cache_hit_result_dir is required for track_cache_hit. " << endl;
             exit(-1);
         }
