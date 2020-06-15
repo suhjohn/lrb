@@ -123,7 +123,7 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
         fpCounter = new FPCounter(params);
     }
     if (track_access_frequency_hit) {
-        accessFrequencyCounter = new AccessFrequencyCounter(trace_file, n_early_stop);
+        accessFrequencyCounter = new AccessFrequencyCounter(trace_file, n_extra_fields, n_early_stop);
     }
 
     // set admission filter
