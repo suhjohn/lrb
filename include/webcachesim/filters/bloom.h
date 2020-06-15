@@ -6,8 +6,11 @@
 #define LRB_BLOOM_H
 
 
-#include <sstream>
+#include <fstream>
+#include <algorithm>
 #include <vector>
+
+#include <sstream>
 #include <unordered_set>
 #include <unordered_map>
 #include <bf/bloom_filter/basic.hpp>
@@ -62,7 +65,7 @@ public:
     int n_added_obj = 0;
     int k = 2;
 
-    std::vector<unordered_set <uint64_t>> filters;
+    std::vector <unordered_set<uint64_t>> filters;
 };
 
 static FilterFactory <SetFilter> factorySetFilter("Set");
@@ -345,6 +348,55 @@ public:
             }
         }
         filter->should_filter(req);
+    }
+};
+
+
+class AccessFrequencyCounter {
+public:
+    int64_t n_early_stop;
+    unordered_map <uint64_t, uint64_t> count_map;
+    vector <int64_t> counter_buckets;
+    int bucket_count;
+
+    AccessFrequencyCounter(const string &trace_file, int64_t _n_early_stop = -1, int _bucket_count = 3) {
+        cerr << "init AccessFrequencyCounter" << endl;
+        n_early_stop = _n_early_stop;
+        bucket_count = _bucket_count;
+        for (int i = 0; i < bucket_count; i++) {
+            counter_buckets.push_back(0);
+        }
+
+        // count object count until n_early_stop
+        ifstream infile(trace_file);
+        if (!infile) {
+            cerr << "Exception opening/reading file " << _trace_file << endl;
+            exit(-1);
+        }
+        int seq = 0;
+        uint64_t t, id, size;
+        while ((infile >> t >> id >> size) && seq != _n_early_stop) {
+            count_map[id] += 1;
+            seq++;
+        }
+    }
+
+    void insert(SimpleRequest &req) {
+        uint64_t key = req.get_id();
+        uint64_t count = count_map[key];
+        if (count == 0) {
+            cerr << "Only objects that have been seen should be recorded. " << endl;
+            exit(-1);
+        }
+        int index = min(count - 1, counter_buckets.size() - 1);
+        counter_buckets[index] += 1;
+    }
+
+    void update_stat(bsoncxx::v_noabi::builder::basic::document &doc) override {
+        doc.append(kvp("access_frequency_buckets", [this](sub_array child) {
+            for (const auto &element : counter_buckets)
+                child.append(element);
+        }));
     }
 };
 

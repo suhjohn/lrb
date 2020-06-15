@@ -85,6 +85,9 @@ public:
     bool track_cache_hit = false;
     ofstream cache_hit_ofstream;
 
+    bool track_access_frequency_hit = false;
+    AccessFrequencyCounter *accessFrequencyCounter;
+
     FrameWork(const std::string &trace_file, const std::string &cache_type, const uint64_t &cache_size,
               std::map<std::string, std::string> &params);
 

@@ -71,6 +71,10 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
             int _val = stoi(it->second);
             track_cache_hit = _val != 0;
             ++it;
+        } else if(it->first == "track_access_frequency_hit") {
+            int _val = stoi(it->second);
+            track_access_frequency_hit = _val != 0;
+            ++it;
         } else {
             ++it;
         }
@@ -117,6 +121,9 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
     }
     if (bloom_track_fp) {
         fpCounter = new FPCounter(params);
+    }
+    if (track_access_frequency_hit) {
+        accessFrequencyCounter = new AccessFrequencyCounter(trace_file, n_early_stop);
     }
 
     // set admission filter
@@ -218,9 +225,6 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
     unordered_map <uint64_t, uint32_t> future_timestamps;
     vector <uint8_t> eviction_qualities;
     vector <uint16_t> eviction_logic_timestamps;
-//    if (bloom_filter) {
-//        filter = new AkamaiBloomFilter;
-//    }
 
     SimpleRequest *req;
     if (is_offline)
@@ -308,6 +312,9 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
                 if (track_cache_hit) {
                     cache_hit_ofstream << seq << " " << id << " " << size << endl;
                 }
+                if (track_access_frequency_hit) {
+                    accessFrequencyCounter->insert(*req);
+                }
             }
         } else {
             abort();
@@ -391,6 +398,9 @@ bsoncxx::builder::basic::document FrameWork::simulation_results() {
     if (bloom_track_fp) {
         value_builder.append(kvp("bloom_false_positive", fpCounter->false_positive));
         value_builder.append(kvp("bloom_true_positive", fpCounter->true_positive));
+    }
+    if (track_access_frequency_hit) {
+        accessFrequencyCounter->update_stat(value_builder);
     }
     webcache->update_stat(value_builder);
     return value_builder;
