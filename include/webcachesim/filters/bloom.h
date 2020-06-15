@@ -354,16 +354,14 @@ public:
 
 class AccessFrequencyCounter {
 public:
-    int64_t n_early_stop;
     unordered_map <uint64_t, uint64_t> count_map;
     vector <int64_t> counter_buckets;
     int bucket_count;
 
     AccessFrequencyCounter(
-            const string &trace_file, uint _n_extra_fields,
-            int64_t _n_early_stop = -1, int _bucket_count = 3) {
+            const string &trace_file, uint n_extra_fields,
+            int64_t n_early_stop = -1, int _bucket_count = 3) {
         cerr << "init AccessFrequencyCounter" << endl;
-        n_early_stop = _n_early_stop;
         bucket_count = _bucket_count;
 
         for (int i = 0; i < bucket_count; i++) {
@@ -378,8 +376,8 @@ public:
         }
         int seq = 0;
         uint64_t t, id, size;
-        auto extra_features = vector<uint16_t>(_n_extra_fields);
-        while ((infile >> t >> id >> size) && seq != _n_early_stop) {
+        auto extra_features = vector<uint16_t>(n_extra_fields);
+        while ((infile >> t >> id >> size) && seq != n_early_stop) {
             for (int i = 0; i < n_extra_fields; ++i)
                 infile >> extra_features[i];
             count_map[id] += 1;
