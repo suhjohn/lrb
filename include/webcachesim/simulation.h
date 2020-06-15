@@ -82,6 +82,9 @@ public:
     bool bloom_track_fp = false;
     FPCounter *fpCounter;
 
+    bool track_cache_hit = false;
+    ofstream cache_hit_ofstream;
+
     FrameWork(const std::string &trace_file, const std::string &cache_type, const uint64_t &cache_size,
               std::map<std::string, std::string> &params);
 

@@ -67,6 +67,10 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
             int _val = stoi(it->second);
             bloom_track_fp = _val != 0;
             ++it;
+        } else if (it->first = "track_cache_hit") {
+            int _val = stoi(it->second);
+            track_cache_hit = _val != 0;
+            ++it;
         } else {
             ++it;
         }
@@ -89,7 +93,25 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
         cerr << "Exception opening/reading file " << _trace_file << endl;
         exit(-1);
     }
-
+    if (track_cache_hit) {
+        if (!params["cache_hit_result_dir"]) {
+            cerr << "cache_hit_result_dir is required for track_cache_hit. " << endl;
+            exit(-1);
+        }
+        cache_hit_ofstream.open(params["cache_hit_result_dir"] + "/" + params["task_id"]);
+        bsoncxx::builder::basic::document value_builder{};
+        for (auto &k: params) {
+            //don't store authentication information
+            if (unordered_set<string>({"dburi"}).count(k.first)) {
+                continue;
+            }
+            if (!unordered_set<string>({"dbcollection", "task_id", "enable_trace_format_check"}).count(k.first)) {
+                value_builder.append(kvp(k.first, k.second));
+            }
+        }
+        string json_result = bsoncxx::to_json(value_builder.view());
+        cache_hit_ofstream << json_result << endl;
+    }
     if (bloom_track_k_hit) {
         kHitCounter = new KHitCounter(params);
     }
@@ -281,6 +303,10 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
                 }
                 if (bloom_track_fp) {
                     fpCounter->insert(*req);
+                }
+            } else {
+                if (track_cache_hit) {
+                    cache_hit_ofstream << seq << id << size << endl;
                 }
             }
         } else {
