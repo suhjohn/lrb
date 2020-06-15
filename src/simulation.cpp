@@ -67,7 +67,7 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
             int _val = stoi(it->second);
             bloom_track_fp = _val != 0;
             ++it;
-        } else if (it->first = "track_cache_hit") {
+        } else if (it->first == "track_cache_hit") {
             int _val = stoi(it->second);
             track_cache_hit = _val != 0;
             ++it;
