@@ -392,7 +392,7 @@ public:
         counter_buckets[index] += 1;
     }
 
-    void update_stat(bsoncxx::v_noabi::builder::basic::document &doc) override {
+    void update_stat(bsoncxx::v_noabi::builder::basic::document &doc) {
         doc.append(kvp("access_frequency_buckets", [this](sub_array child) {
             for (const auto &element : counter_buckets)
                 child.append(element);
