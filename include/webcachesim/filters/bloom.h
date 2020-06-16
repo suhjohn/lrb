@@ -360,7 +360,7 @@ public:
 
     AccessFrequencyCounter(
             const string &trace_file, uint n_extra_fields,
-            int64_t n_early_stop = -1, int _bucket_count = 3) {
+            int64_t n_early_stop = -1, int _bucket_count = 4) {
         cerr << "init AccessFrequencyCounter" << endl;
         bucket_count = _bucket_count;
 
@@ -403,5 +403,81 @@ public:
         }));
     }
 };
+
+
+class AccessResourceCounter {
+public:
+    unordered_map <uint64_t, uint64_t> count_map;
+    unordered_map <uint64_t, uint64_t> size_map;
+    unordered_map <uint64_t, uint64_t> seq_map;
+
+    vector <int64_t> counter_buckets;
+    int bucket_count;
+    int seq = 0;
+    AccessResourceCounter(
+            const string &trace_file, uint n_extra_fields,
+            int64_t n_early_stop = -1, int _bucket_count = 4) {
+        cerr << "init AccessResourceCounter" << endl;
+        bucket_count = _bucket_count;
+
+        for (int i = 0; i < bucket_count; i++) {
+            counter_buckets.push_back(0);
+        }
+
+        // count object count until n_early_stop
+        ifstream infile(trace_file);
+        if (!infile) {
+            cerr << "Exception opening/reading file " << trace_file << endl;
+            exit(-1);
+        }
+        uint64_t t, id, size;
+        auto extra_features = vector<uint16_t>(n_extra_fields);
+        while ((infile >> t >> id >> size) && seq != n_early_stop) {
+            for (int i = 0; i < n_extra_fields; ++i)
+                infile >> extra_features[i];
+            count_map[id] += 1;
+            seq++;
+        }
+        seq = 0;
+    }
+
+    void incr_seq() {
+        seq++;
+    }
+
+    void on_admit(SimpleRequest &req) {
+        uint64_t key = req.get_id();
+        size_map[key] = req.get_size();
+        seq_map[key] = req.get_t();
+    }
+
+    void on_evict(uint64_t key) {
+        cerr << "AccessResourceCounter on_evict" << " " << key << endl;
+        add_resource(key);
+        size_map.erase(key);
+        seq_map.erase(key);
+    }
+
+    void add_resource(uint64_t key) {
+        uint64_t count = count_map[key];
+        int index = min(count - 1, counter_buckets.size() - 1);
+        auto resource = size_map[key] * (seq - seq_map[key]);
+        counter_buckets[index] += resource;
+    }
+
+    void update_stat(bsoncxx::v_noabi::builder::basic::document &doc) {
+        for (const auto &pair : size_map ) {
+            add_resource(pair.first);
+        }
+        size_map.clear();
+        seq_map.clear();
+
+        doc.append(kvp("access_resource_buckets", [this](sub_array child) {
+            for (const auto &element : counter_buckets)
+                child.append(element);
+        }));
+    }
+};
+
 
 #endif //LRB_BLOOM_H

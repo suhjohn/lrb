@@ -66,6 +66,10 @@ public:
     inline uint64_t get_size() const {
         return _size;
     }
+
+    inline uint64_t get_t() const {
+        return _t;
+    }
 };
 
 

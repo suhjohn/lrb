@@ -7,7 +7,7 @@ trace_files:
 cache_types:
 #  - LRB
   - LRU
-  - LFUDA
-  - LURK
-  - GDSF
-  - LeCaR
+#  - LFUDA
+#  - LURK
+#  - GDSF
+#  - LeCaR

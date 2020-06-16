@@ -144,6 +144,9 @@ void LRUCache::evict()
         _size_map.erase(obj);
         _cacheMap.erase(obj);
         _cacheList.erase(lit);
+        for (size_t i = 0; i < evictionCallbacks.size(); i++){
+            evictionCallbacks[i](obj);
+        }
     }
 }
 

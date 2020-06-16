@@ -10,6 +10,7 @@
 #include "request.h"
 #include "common.h"
 #include "bsoncxx/builder/basic/document.hpp"
+#include <functional>
 
 namespace webcachesim {
 
@@ -74,6 +75,11 @@ namespace webcachesim {
 
         uint64_t getSize() const {
             return (_cacheSize);
+        }
+
+        vector<function<void(uint64_t)>> evictionCallbacks;
+        void addEvictionCallback(std::function<void(uint64_t)> cb) {
+            evictionCallbacks.push_back(cb);
         }
 
         // helper functions (factory pattern)

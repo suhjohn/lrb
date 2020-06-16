@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <unordered_map>
 #include <numeric>
+#include <functional>
 #include "bsoncxx/builder/basic/document.hpp"
 #include "bsoncxx/json.hpp"
 
@@ -75,6 +76,10 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
             int _val = stoi(it->second);
             track_access_frequency_hit = _val != 0;
             ++it;
+        } else if(it->first == "track_access_resource_hit") {
+            int _val = stoi(it->second);
+            track_access_frequency_hit = _val != 0;
+            ++it;
         } else {
             ++it;
         }
@@ -125,6 +130,9 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
     if (track_access_frequency_hit) {
         accessFrequencyCounter = new AccessFrequencyCounter(trace_file, n_extra_fields, n_early_stop);
     }
+    if (track_access_resource_hit) {
+        accessResourceCounter = new AccessResourceCounter(trace_file, n_extra_fields, n_early_stop);
+    }
 
     // set admission filter
     uint64_t total_bytes_used = 0;
@@ -160,6 +168,10 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
     // configure cache size
     webcache->setSize(_cache_size);
     webcache->init_with_params(params);
+    if (track_access_resource_hit) {
+        auto f = bind(&AccessResourceCounter::on_evict, a, placeholders::_1);
+        webcache->addEvictionCallback(f);
+    }
 
     if (params.count("version")) {
         version = stoi(params["version"]);
@@ -301,6 +313,9 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
                 }
                 if (!should_filter) {
                     webcache->admit(*req);
+                    if (track_access_resource_hit) {
+                        accessResourceCounter->insert(*req);
+                    }
                 }
                 if (bloom_track_k_hit) {
                     kHitCounter->insert(*req);
@@ -315,6 +330,7 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
                 if (track_access_frequency_hit) {
                     accessFrequencyCounter->insert(*req);
                 }
+
             }
         } else {
             abort();
@@ -401,6 +417,9 @@ bsoncxx::builder::basic::document FrameWork::simulation_results() {
     }
     if (track_access_frequency_hit) {
         accessFrequencyCounter->update_stat(value_builder);
+    }
+    if (track_access_resource_hit){
+        accessResourceCounter->update_stat(value_builder);
     }
     webcache->update_stat(value_builder);
     return value_builder;
