@@ -17,6 +17,7 @@
 #include <bf/bloom_filter/counting.hpp>
 #include "filter.h"
 #include "bsoncxx/builder/basic/document.hpp"
+#include "bsoncxx/builder/stream/document.hpp"
 #include <bsoncxx/builder/stream/array.hpp>
 #include <bsoncxx/builder/stream/helpers.hpp>
 #include "bsoncxx/json.hpp"
