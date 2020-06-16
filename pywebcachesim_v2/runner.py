@@ -2,6 +2,7 @@ import re
 import time
 import subprocess
 import json
+import random
 from multiprocessing.pool import ThreadPool
 
 
@@ -101,20 +102,19 @@ def run(pywebcachesim_task_id, raw_tasks, execution_settings):
         # assign nodes tasks
         #    just need to know how many available cores
         if tasks:
-            curr_node_available_cores = {
-                node: max_node_available_cores[node] - len(running_task_ids[node])
-                for node in nodes
-            }
+            available_nodes = []
+            for node in nodes:
+                available_nodes.extend([
+                    node for _ in range(max_node_available_cores[node] - len(running_task_ids[node]))
+                ])
+            random.shuffle(available_nodes)
             new_tasks = []
-            for node, available_cores in curr_node_available_cores.items():
-                if available_cores == 0:
-                    continue
-                for _ in range(min(available_cores, len(tasks))):
-                    task_id, task_str = tasks.pop()
-                    new_tasks.append((node, task_str))
-                    running_task_ids[node].append(task_id)
+            for node in available_nodes:
                 if not tasks:
                     break
+                task_id, task_str = tasks.pop()
+                new_tasks.append((node, task_str))
+                running_task_ids[node].append(task_id)
 
             # execute new tasks
             print(f"running {len(new_tasks)}")
