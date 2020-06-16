@@ -25,7 +25,6 @@
 using bsoncxx::builder::basic::kvp;
 using bsoncxx::builder::basic::sub_array;
 using bsoncxx::builder::stream::document;
-using bsoncxx::builder::stream::array;
 using bsoncxx::builder::stream::open_array;
 using bsoncxx::builder::stream::close_array;
 using bsoncxx::builder::stream::open_document;
@@ -501,8 +500,7 @@ public:
         size_map.clear();
         seq_map.clear();
 
-        auto arr = array{};
-
+        auto arr =  bsoncxx::builder::stream::array{};
         for (int i = 0; i < counter_buckets.size(); i++) {
             arr << open_array;
             for (int j = 0; j < counter_buckets[i].size(); j++) {
