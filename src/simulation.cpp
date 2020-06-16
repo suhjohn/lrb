@@ -169,7 +169,7 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
     webcache->setSize(_cache_size);
     webcache->init_with_params(params);
     if (track_access_resource_hit) {
-        auto f = bind(&AccessResourceCounter::on_evict, a, placeholders::_1);
+        auto f = bind(&AccessResourceCounter::on_evict, accessResourceCounter, placeholders::_1);
         webcache->addEvictionCallback(f);
     }
 
@@ -314,7 +314,7 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
                 if (!should_filter) {
                     webcache->admit(*req);
                     if (track_access_resource_hit) {
-                        accessResourceCounter->insert(*req);
+                        accessResourceCounter->on_admit(*req);
                     }
                 }
                 if (bloom_track_k_hit) {
