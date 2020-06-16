@@ -78,7 +78,7 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
             ++it;
         } else if(it->first == "track_access_resource_hit") {
             int _val = stoi(it->second);
-            track_access_frequency_hit = _val != 0;
+            track_access_resource_hit = _val != 0;
             ++it;
         } else {
             ++it;
