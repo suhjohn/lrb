@@ -52,7 +52,7 @@ wiki2018.tr:
             - 35234263115
   n_req: 2800000000
   n_early_stop:
-    - -1
+    - 200000000
   segment_window: 10000000
   real_time_segment_window: 6000
   enable_trace_format_check: 0
@@ -185,7 +185,7 @@ wiki2019.tr:
             - 35234263115
   n_req: 2800000000
   n_early_stop:
-    - -1
+    - 200000000
   segment_window: 10000000
   real_time_segment_window: 6000
   enable_trace_format_check: 0
