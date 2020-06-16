@@ -115,7 +115,8 @@ def run(pywebcachesim_task_id, raw_tasks, execution_settings):
                 task_id, task_str = tasks.pop()
                 new_tasks.append((node, task_str))
                 running_task_ids[node].append(task_id)
-
+                print(node, task_id)
+                
             # execute new tasks
             print(f"running {len(new_tasks)}")
             if new_tasks:
