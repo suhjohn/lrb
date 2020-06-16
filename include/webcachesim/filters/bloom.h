@@ -17,10 +17,18 @@
 #include <bf/bloom_filter/counting.hpp>
 #include "filter.h"
 #include "bsoncxx/builder/basic/document.hpp"
+#include <bsoncxx/builder/stream/array.hpp>
+#include <bsoncxx/builder/stream/helpers.hpp>
 #include "bsoncxx/json.hpp"
 
 using bsoncxx::builder::basic::kvp;
 using bsoncxx::builder::basic::sub_array;
+using bsoncxx::builder::stream::document;
+using bsoncxx::builder::stream::array;
+using bsoncxx::builder::stream::open_array;
+using bsoncxx::builder::stream::close_array;
+using bsoncxx::builder::stream::open_document;
+using bsoncxx::builder::stream::close_document;
 
 using namespace std;
 
@@ -453,7 +461,7 @@ public:
     }
 
     void record_buckets() {
-        counter_buckets.push_back(vector<int64_t> v(current_buckets));
+        counter_buckets.push_back(vector<int64_t> (current_buckets));
         reset_buckets();
     }
 
@@ -492,10 +500,17 @@ public:
         size_map.clear();
         seq_map.clear();
 
-        doc.append(kvp("access_resource_buckets", [this](sub_array child) {
-            for (const auto &element : counter_buckets)
-                child.append(element);
-        }));
+        auto arr = array{};
+
+        for (int i = 0; i < counter_buckets.size(); i++) {
+            arr << open_array;
+            for (int j = 0; j < counter_buckets[i].size(); j++) {
+                arr << counter_buckets[i][j];
+            }
+            arr << close_array;
+        }
+
+        doc.append(kvp("access_resource_buckets", arr);
     }
 };
 
