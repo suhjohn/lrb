@@ -487,7 +487,7 @@ public:
 
     void add_resource(uint64_t key) {
         uint64_t count = count_map[key];
-        int index = min(count - 1, counter_buckets.size() - 1);
+        int index = min(count - 1, current_buckets.size() - 1);
         auto resource = size_map[key] * (seq - seq_map[key]);
         current_buckets[index] += resource;
     }
@@ -509,7 +509,7 @@ public:
             arr << close_array;
         }
 
-        doc.append(kvp("access_resource_buckets", arr);
+        doc.append(kvp("access_resource_buckets", arr));
     }
 };
 
