@@ -466,6 +466,9 @@ public:
     }
 
     void incr_seq() {
+        if (seq && !(seq % segment_window)) {
+            record_buckets();
+        }
         seq++;
     }
 
@@ -477,9 +480,6 @@ public:
 
     void on_evict(uint64_t key) {
 //        cerr << "AccessResourceCounter on_evict" << " " << key << endl;
-        if (seq && !(seq % segment_window)) {
-            record_buckets();
-        }
         add_resource(key);
         size_map.erase(key);
         seq_map.erase(key);
