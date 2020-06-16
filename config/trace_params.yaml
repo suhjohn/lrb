@@ -1,50 +1,50 @@
 wiki2018.tr:
   cache_sizes:
     - 68719476736:
-        LRU:
-          max_n_element:
-            - 40000000
-            - 32768
+#        LRU:
+#          max_n_element:
+#            - 40000000
+#            - 32768
         LRB:
           memory_window:
             - 58720256
           byte_million_req:
             - 35234263115
     - 137438953472:
-        LRU:
-          max_n_element:
-            - 40000000
-            - 100000
+#        LRU:
+#          max_n_element:
+#            - 40000000
+#            - 100000
         LRB:
           memory_window:
             - 100663296
           byte_million_req:
             - 35234263115
     - 274877906944:
-        LRU:
-          max_n_element:
-            - 40000000
-            - 262144
+#        LRU:
+#          max_n_element:
+#            - 40000000
+#            - 262144
         LRB:
           memory_window:
             - 167772160
           byte_million_req:
             - 35234263115
     - 549755813888:
-        LRU:
-          max_n_element:
-            - 40000000
-            - 1000000
+#        LRU:
+#          max_n_element:
+#            - 40000000
+#            - 1000000
         LRB:
           memory_window:
             - 335544320
           byte_million_req:
             - 35234263115
     - 1099511627776:
-        LRU:
-          max_n_element:
-            - 40000000
-            - 1000000
+#        LRU:
+#          max_n_element:
+#            - 40000000
+#            - 1000000
         LRB:
           memory_window:
             - 671088640
@@ -116,8 +116,8 @@ wiki2018.tr:
 #    - 10000000
 #    - 100000000
 #    - 40000000
-  bloom_k:
-    - 2
+#  bloom_k:
+#    - 2
 #    - 4
 #    - 8
 #    - 16
@@ -126,58 +126,58 @@ wiki2018.tr:
 #  bloom_track_fp: 1
   version:
     - 2
-  filter_type:
-    - Bloom
+#  filter_type:
+#    - Bloom
   track_access_frequency_hit: 1
   track_access_resource_hit: 1
 
 wiki2019.tr:
   cache_sizes:
     - 68719476736:
-        LRU:
-          max_n_element:
-            - 40000000
-            - 400000
+#        LRU:
+#          max_n_element:
+#            - 40000000
+#            - 400000
         LRB:
           memory_window:
             - 58720256
           byte_million_req:
             - 35234263115
     - 137438953472:
-        LRU:
-          max_n_element:
-            - 40000000
-            - 600000
+#        LRU:
+#          max_n_element:
+#            - 40000000
+#            - 600000
         LRB:
           memory_window:
             - 100663296
           byte_million_req:
             - 35234263115
     - 274877906944:
-        LRU:
-          max_n_element:
-            - 40000000
-            - 800000
+#        LRU:
+#          max_n_element:
+#            - 40000000
+#            - 800000
         LRB:
           memory_window:
             - 167772160
           byte_million_req:
             - 35234263115
     - 549755813888:
-        LRU:
-          max_n_element:
-            - 40000000
-            - 1600000
+#        LRU:
+#          max_n_element:
+#            - 40000000
+#            - 1600000
         LRB:
           memory_window:
             - 335544320
           byte_million_req:
             - 35234263115
     - 1099511627776:
-        LRU:
-          max_n_element:
-            - 40000000
-            - 3600000
+#        LRU:
+#          max_n_element:
+#            - 40000000
+#            - 3600000
         LRB:
           memory_window:
             - 671088640
@@ -249,8 +249,8 @@ wiki2019.tr:
 #    - 10000000
 #    - 100000000
 #    - 40000000
-  bloom_k:
-    - 2
+#  bloom_k:
+#    - 2
 #    - 4
 #    - 8
 #    - 16
@@ -259,7 +259,7 @@ wiki2019.tr:
 #  bloom_track_fp: 1
   version:
     - 2
-  filter_type:
-    - Bloom
+#  filter_type:
+#    - Bloom
   track_access_frequency_hit: 1
   track_access_resource_hit: 1
