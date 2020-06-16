@@ -339,6 +339,10 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
         if (track_access_resource_hit) {
             accessResourceCounter->incr_seq();
         }
+        if (track_access_frequency_hit) {
+            accessFrequencyCounter->incr_seq();
+        }
+
     }
     delete req;
     //for the residue segment of trace
