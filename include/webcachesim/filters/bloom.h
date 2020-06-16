@@ -411,18 +411,22 @@ public:
     unordered_map <uint64_t, uint64_t> count_map;
     unordered_map <uint64_t, uint64_t> size_map;
     unordered_map <uint64_t, uint64_t> seq_map;
+    vector <int64_t> current_buckets;
+    vector <vector<int64_t>> counter_buckets;
 
-    vector <int64_t> counter_buckets;
     int bucket_count;
+    uint64_t segment_window;
     int seq = 0;
+
     AccessResourceCounter(
             const string &trace_file, uint n_extra_fields,
-            int64_t n_early_stop = -1, int _bucket_count = 4) {
+            int64_t n_early_stop = -1, uint64_t segment_window = 1000000,
+            int _bucket_count = 4) {
         cerr << "init AccessResourceCounter" << endl;
         bucket_count = _bucket_count;
 
         for (int i = 0; i < bucket_count; i++) {
-            counter_buckets.push_back(0);
+            current_buckets.push_back(0);
         }
 
         // count object count until n_early_stop
@@ -442,6 +446,17 @@ public:
         seq = 0;
     }
 
+    void reset_buckets() {
+        for (int i = 0; i < bucket_count; i++) {
+            current_buckets[i] = 0;
+        }
+    }
+
+    void record_buckets() {
+        counter_buckets.push_back(vector<int64_t> v(current_buckets));
+        reset_buckets();
+    }
+
     void incr_seq() {
         seq++;
     }
@@ -454,6 +469,9 @@ public:
 
     void on_evict(uint64_t key) {
 //        cerr << "AccessResourceCounter on_evict" << " " << key << endl;
+        if (seq && !(seq % segment_window)) {
+            record_buckets();
+        }
         add_resource(key);
         size_map.erase(key);
         seq_map.erase(key);
@@ -463,13 +481,14 @@ public:
         uint64_t count = count_map[key];
         int index = min(count - 1, counter_buckets.size() - 1);
         auto resource = size_map[key] * (seq - seq_map[key]);
-        counter_buckets[index] += resource;
+        current_buckets[index] += resource;
     }
 
     void update_stat(bsoncxx::v_noabi::builder::basic::document &doc) {
-        for (const auto &pair : size_map ) {
+        for (const auto &pair : size_map) {
             add_resource(pair.first);
         }
+        record_buckets();
         size_map.clear();
         seq_map.clear();
 
