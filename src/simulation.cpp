@@ -330,7 +330,6 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
                 if (track_access_frequency_hit) {
                     accessFrequencyCounter->insert(*req);
                 }
-
             }
         } else {
             abort();

@@ -129,6 +129,7 @@ wiki2018.tr:
   filter_type:
     - Bloom
   track_access_frequency_hit: 1
+  track_access_resource_hit: 1
 
 wiki2019.tr:
   - 68719476736:
@@ -260,3 +261,4 @@ wiki2019.tr:
   filter_type:
     - Bloom
   track_access_frequency_hit: 1
+  track_access_resource_hit: 1
