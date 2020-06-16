@@ -453,7 +453,7 @@ public:
     }
 
     void on_evict(uint64_t key) {
-        cerr << "AccessResourceCounter on_evict" << " " << key << endl;
+//        cerr << "AccessResourceCounter on_evict" << " " << key << endl;
         add_resource(key);
         size_map.erase(key);
         seq_map.erase(key);
