@@ -364,17 +364,24 @@ public:
 class AccessFrequencyCounter {
 public:
     unordered_map <uint64_t, uint64_t> count_map;
-    vector <int64_t> counter_buckets;
+    vector <int64_t> current_buckets;
+    vector <vector<int64_t>> counter_buckets;
+
+
     int bucket_count;
+    uint64_t segment_window;
+    int seq = 0;
 
     AccessFrequencyCounter(
             const string &trace_file, uint n_extra_fields,
-            int64_t n_early_stop = -1, int _bucket_count = 4) {
+            int64_t n_early_stop = -1, uint64_t _segment_window = 10000000,
+            int _bucket_count = 4) {
         cerr << "init AccessFrequencyCounter" << endl;
         bucket_count = _bucket_count;
+        segment_window = _segment_window;
 
         for (int i = 0; i < bucket_count; i++) {
-            counter_buckets.push_back(0);
+            current_buckets.push_back(0);
         }
 
         // count object count until n_early_stop
@@ -383,7 +390,6 @@ public:
             cerr << "Exception opening/reading file " << trace_file << endl;
             exit(-1);
         }
-        int seq = 0;
         uint64_t t, id, size;
         auto extra_features = vector<uint16_t>(n_extra_fields);
         while ((infile >> t >> id >> size) && seq != n_early_stop) {
@@ -392,24 +398,47 @@ public:
             count_map[id] += 1;
             seq++;
         }
+        seq = 0;
+    }
+
+    void reset_buckets() {
+        for (int i = 0; i < bucket_count; i++) {
+            current_buckets[i] = 0;
+        }
+    }
+
+    void record_buckets() {
+        counter_buckets.push_back(vector<int64_t> (current_buckets));
+        reset_buckets();
+    }
+
+    void incr_seq() {
+        if (seq && !(seq % segment_window)) {
+            record_buckets();
+        }
+        seq++;
     }
 
     void insert(SimpleRequest &req) {
         uint64_t key = req.get_id();
         uint64_t count = count_map[key];
-        if (count == 0) {
-            cerr << "Only objects that have been seen should be recorded. " << endl;
-            exit(-1);
-        }
-        int index = min(count - 1, counter_buckets.size() - 1);
-        counter_buckets[index] += 1;
+        int index = min(count - 1, current_buckets.size() - 1);
+        current_buckets[index] += 1;
     }
 
     void update_stat(bsoncxx::v_noabi::builder::basic::document &doc) {
-        doc.append(kvp("access_frequency_buckets", [this](sub_array child) {
-            for (const auto &element : counter_buckets)
-                child.append(element);
-        }));
+        record_buckets();
+
+        auto arr =  bsoncxx::builder::stream::array{};
+        for (int i = 0; i < counter_buckets.size(); i++) {
+            arr << open_array;
+            for (int j = 0; j < counter_buckets[i].size(); j++) {
+                arr << counter_buckets[i][j];
+            }
+            arr << close_array;
+        }
+
+        doc.append(kvp("access_frequency_buckets", arr));
     }
 };
 
