@@ -601,7 +601,7 @@ public:
     void record_buckets() {
         counter_buckets.push_back(vector<int64_t>(current_buckets));
         counter_buckets_bytes.push_back(
-                vector<int64_t>(current_buckets_bytes);
+                vector<int64_t>(current_buckets_bytes)
         )
         reset_buckets();
     }
@@ -618,7 +618,7 @@ public:
         int age = seq_age_map[key];
 
         // get bits of age
-        int bits, var = (age < 0) ? -age : age;
+        unsigned bits, var = (age < 0) ? -age : age;
         for (bits = 0; var != 0; ++bits) var >>= 1;
 
         int index = min(bits, current_buckets.size() - 1);
