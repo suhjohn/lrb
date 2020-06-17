@@ -23,7 +23,7 @@ wiki2018.tr:
     - 274877906944:
         LRU:
           max_n_element:
-            - 40000000
+#            - 40000000
             - 262144
         LRB:
           memory_window:
