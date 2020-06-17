@@ -9,15 +9,21 @@ class AgeObjectBins:
         self.bins = [0 for _ in range(max_pow + 1)]
         self.last_accessed = defaultdict(int)  # key: last access logical time
         self.max_bin_size = max_pow
+        self.bin_list = []
 
-    def incr_count(self, key, curr_index):
+    def record_stat(self):
+        self.bin_list.append(self.bins)
+        for i in range(len(self.bins)):
+            self.bins[i] = 0
+
+    def incr_count(self, curr_index, key):
         if self.last_accessed[key]:
             age_index = min((curr_index - self.last_accessed[key]).bit_length(), self.max_bin_size)
             self.bins[age_index] += 1
         self.last_accessed[key] = curr_index
 
     def get_bins(self):
-        return list(self.bins)
+        return list(self.bin_list)
 
 
 class AgeByteBins:
@@ -25,15 +31,21 @@ class AgeByteBins:
         self.bins = [0 for _ in range(max_pow + 1)]
         self.last_accessed = defaultdict(int)  # key: last access logical time
         self.max_bin_size = max_pow
+        self.bin_list = []
 
-    def incr_count(self, key, curr_index, size):
+    def record_stat(self):
+        self.bin_list.append(self.bins)
+        for i in range(len(self.bins)):
+            self.bins[i] = 0
+
+    def incr_count(self, curr_index, key, size):
         if self.last_accessed[key]:
             age_index = min((curr_index - self.last_accessed[key]).bit_length(), self.max_bin_size)
             self.bins[age_index] += size
         self.last_accessed[key] = curr_index
 
     def get_bins(self):
-        return list(self.bins)
+        return list(self.bin_list)
 
 
 class FreqObjectBins:
@@ -41,14 +53,20 @@ class FreqObjectBins:
         self.freq_counter = defaultdict(int)
         self.bins = [0 for _ in range(max_pow + 1)]
         self.max_bin_size = max_pow
+        self.bin_list = []
 
-    def incr_count(self, key):
+    def record_stat(self):
+        self.bin_list.append(self.bins)
+        for i in range(len(self.bins)):
+            self.bins[i] = 0
+
+    def incr_count(self, curr_index, key):
         self.freq_counter[key] += 1
         freq_index = min(self.freq_counter[key].bit_length(), self.max_bin_size)
         self.bins[freq_index] += 1
 
     def get_bins(self):
-        return list(self.bins)
+        return list(self.bin_list)
 
 
 class FreqByteBins:
@@ -56,14 +74,20 @@ class FreqByteBins:
         self.freq_counter = defaultdict(int)
         self.bins = [0 for _ in range(max_pow + 1)]
         self.max_bin_size = max_pow
+        self.bin_list = []
 
-    def incr_count(self, key, size):
+    def record_stat(self):
+        self.bin_list.append(self.bins)
+        for i in range(len(self.bins)):
+            self.bins[i] = 0
+
+    def incr_count(self, curr_index, key, size):
         self.freq_counter[key] += 1
         freq_index = min(self.freq_counter[key].bit_length(), self.max_bin_size)
         self.bins[freq_index] += size
 
     def get_bins(self):
-        return list(self.bins)
+        return list(self.bin_list)
 
 
 class TraceIterator:
@@ -121,12 +145,22 @@ class TraceStatistics:
         self.age_byte_bins = AgeByteBins(50)
         self.freq_obj_bins = FreqObjectBins(50)
         self.freq_byte_bins = FreqByteBins(50)
+        self.segment_window = 1000000
+
+    def record_stat(self):
+        self.age_obj_bins.record_stat()
+        self.age_byte_bins.record_stat()
+        self.freq_obj_bins.record_stat()
+        self.freq_byte_bins.record_stat()
 
     def update(self, index, timestamp, key, size):
-        self.age_obj_bins.incr_count(key, index)
-        self.age_byte_bins.incr_count(key, index, size)
-        self.freq_obj_bins.incr_count(key)
-        self.freq_byte_bins.incr_count(key, size)
+        if index and index % self.segment_window:
+            self.record_stat()
+
+        self.age_obj_bins.incr_count(index, key)
+        self.age_byte_bins.incr_count(index, key, size)
+        self.freq_obj_bins.incr_count(index, key)
+        self.freq_byte_bins.incr_count(index, key, size)
 
     def get_result(self):
         return {
@@ -143,6 +177,7 @@ def analyze(trace_filepath):
     for trace in trace_iterator:
         index, timestamp, key, size = trace
         trace_statistics.update(index, timestamp, key, size)
+    trace_statistics.record_stat()
     result = trace_statistics.get_result()
     result["trace_file"] = trace_filepath.split("/")[-1]
     return result
@@ -151,8 +186,10 @@ def analyze(trace_filepath):
 def analyze_and_write_to_mongo(trace_filename, dburi):
     trace_dir = os.environ["WEBCACHESIM_TRACE_DIR"]
     trace_filepath = f'{trace_dir}/{trace_filename}'
+    print(f"[analyze_and_write_to_mongo] filepath: {trace_filepath}")
+    print(f"[analyze_and_write_to_mongo] dburi: {dburi}")
     result = analyze(trace_filepath)
-
+    print(result)
     client = MongoClient(dburi)
     db = client["webcachesim"]
     collection = db["trace_analysis"]
