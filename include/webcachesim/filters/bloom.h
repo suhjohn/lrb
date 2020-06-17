@@ -457,7 +457,7 @@ public:
 
     AccessResourceCounter(
             const string &trace_file, uint n_extra_fields,
-            int64_t n_early_stop = -1, uint64_t _segment_window = 10000000,
+            int64_t n_early_stop = -1, uint64_t _segment_window = 1000000,
             int _bucket_count = 4) {
         cerr << "init AccessResourceCounter" << endl;
         bucket_count = _bucket_count;
