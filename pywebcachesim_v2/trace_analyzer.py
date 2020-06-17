@@ -12,7 +12,7 @@ class AgeObjectBins:
         self.bin_list = []
 
     def record_stat(self):
-        self.bin_list.append(self.bins)
+        self.bin_list.append(list(self.bins))
         for i in range(len(self.bins)):
             self.bins[i] = 0
 
@@ -34,7 +34,7 @@ class AgeByteBins:
         self.bin_list = []
 
     def record_stat(self):
-        self.bin_list.append(self.bins)
+        self.bin_list.append(list(self.bins))
         for i in range(len(self.bins)):
             self.bins[i] = 0
 
@@ -56,7 +56,7 @@ class FreqObjectBins:
         self.bin_list = []
 
     def record_stat(self):
-        self.bin_list.append(self.bins)
+        self.bin_list.append(list(self.bins))
         for i in range(len(self.bins)):
             self.bins[i] = 0
 
@@ -77,7 +77,7 @@ class FreqByteBins:
         self.bin_list = []
 
     def record_stat(self):
-        self.bin_list.append(self.bins)
+        self.bin_list.append(list(self.bins))
         for i in range(len(self.bins)):
             self.bins[i] = 0
 
