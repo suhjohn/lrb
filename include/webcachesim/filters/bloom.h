@@ -555,7 +555,7 @@ public:
 
     int bucket_count;
     uint64_t segment_window;
-    int seq = 0;
+    int seq = 1;
 
     AccessAgeCounter(
             const string &trace_file, uint n_extra_fields,
@@ -588,7 +588,7 @@ public:
             obj_prev_seq[id] = seq;
             seq++;
         }
-        seq = 0;
+        seq = 1;
     }
 
     void reset_buckets() {
@@ -614,8 +614,9 @@ public:
     }
 
     void insert(SimpleRequest &req) {
-        uint64_t key = req.get_t();
+        uint64_t key = req.get_t() + 1;
         int age = seq_age_map[key];
+        cerr << seq << " " << age << endl;
 
         // get bits of age
         uint64_t bits, var = (age < 0) ? -age : age;
