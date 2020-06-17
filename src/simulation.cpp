@@ -133,6 +133,9 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
     if (track_access_resource_hit) {
         accessResourceCounter = new AccessResourceCounter(trace_file, n_extra_fields, n_early_stop);
     }
+    if (track_access_age_hit) {
+        accessAgeCounter = new AccessAgeCounter(trace_file, n_extra_fields, n_early_stop);
+    }
 
     // set admission filter
     uint64_t total_bytes_used = 0;
@@ -330,6 +333,9 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
                 if (track_access_frequency_hit) {
                     accessFrequencyCounter->insert(*req);
                 }
+                if (track_access_age_hit) {
+                    accessAgeCounter->insert(*req);
+                }
             }
         } else {
             abort();
@@ -341,6 +347,9 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
         }
         if (track_access_frequency_hit) {
             accessFrequencyCounter->incr_seq();
+        }
+        if (track_access_age_hit) {
+            accessAgeCounter->incr_seq();
         }
 
     }

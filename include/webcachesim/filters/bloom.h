@@ -408,7 +408,7 @@ public:
     }
 
     void record_buckets() {
-        counter_buckets.push_back(vector<int64_t> (current_buckets));
+        counter_buckets.push_back(vector<int64_t>(current_buckets));
         reset_buckets();
     }
 
@@ -429,7 +429,7 @@ public:
     void update_stat(bsoncxx::v_noabi::builder::basic::document &doc) {
         record_buckets();
 
-        auto arr =  bsoncxx::builder::stream::array{};
+        auto arr = bsoncxx::builder::stream::array{};
         for (int i = 0; i < counter_buckets.size(); i++) {
             arr << open_array;
             for (int j = 0; j < counter_buckets[i].size(); j++) {
@@ -491,7 +491,7 @@ public:
     }
 
     void record_buckets() {
-        counter_buckets.push_back(vector<int64_t> (current_buckets));
+        counter_buckets.push_back(vector<int64_t>(current_buckets));
         reset_buckets();
     }
 
@@ -530,7 +530,7 @@ public:
         size_map.clear();
         seq_map.clear();
 
-        auto arr =  bsoncxx::builder::stream::array{};
+        auto arr = bsoncxx::builder::stream::array{};
         for (int i = 0; i < counter_buckets.size(); i++) {
             arr << open_array;
             for (int j = 0; j < counter_buckets[i].size(); j++) {
@@ -543,5 +543,113 @@ public:
     }
 };
 
+
+class AccessAgeCounter {
+public:
+    unordered_map<int, int> seq_age_map;
+    vector <int64_t> current_buckets;
+    vector <vector<int64_t>> counter_buckets;
+
+    vector <int64_t> current_buckets_bytes;
+    vector <vector<int64_t>> counter_buckets_bytes;
+
+    int bucket_count;
+    uint64_t segment_window;
+    int seq = 0;
+
+    AccessAgeCounter(
+            const string &trace_file, uint n_extra_fields,
+            int64_t n_early_stop = -1, uint64_t _segment_window = 1000000,
+            int _bucket_count = 40) {
+        cerr << "init AccessAgeCounter" << endl;
+        bucket_count = _bucket_count;
+        segment_window = _segment_window;
+
+        for (int i = 0; i < bucket_count; i++) {
+            current_buckets.push_back(0);
+            current_buckets_bytes.push_back(0);
+        }
+
+        // count object count until n_early_stop
+        ifstream infile(trace_file);
+        if (!infile) {
+            cerr << "Exception opening/reading file " << trace_file << endl;
+            exit(-1);
+        }
+        uint64_t t, id, size;
+        unordered_map<int, int> obj_prev_seq;
+        auto extra_features = vector<uint16_t>(n_extra_fields);
+        while ((infile >> t >> id >> size) && seq != n_early_stop) {
+            for (int i = 0; i < n_extra_fields; ++i)
+                infile >> extra_features[i];
+            if (obj_prev_seq[id]) {
+                seq_age_map[seq] = seq - obj_prev_seq[id];
+            };
+            obj_prev_seq[id] = seq;
+            seq++;
+        }
+        seq = 0;
+    }
+
+    void reset_buckets() {
+        for (int i = 0; i < bucket_count; i++) {
+            current_buckets[i] = 0;
+            current_buckets_bytes[i] = 0;
+        }
+    }
+
+    void record_buckets() {
+        counter_buckets.push_back(vector<int64_t>(current_buckets));
+        counter_buckets_bytes.push_back(
+                vector<int64_t>(current_buckets_bytes);
+        )
+        reset_buckets();
+    }
+
+    void incr_seq() {
+        if (seq && !(seq % segment_window)) {
+            record_buckets();
+        }
+        seq++;
+    }
+
+    void insert(SimpleRequest &req) {
+        uint64_t key = req.get_t();
+        int age = seq_age_map[key];
+
+        // get bits of age
+        int bits, var = (age < 0) ? -age : age;
+        for (bits = 0; var != 0; ++bits) var >>= 1;
+
+        int index = min(bits, current_buckets.size() - 1);
+        current_buckets[index] += 1;
+        current_buckets_bytes[index] += req.get_size();
+    }
+
+    void update_stat(bsoncxx::v_noabi::builder::basic::document &doc) {
+        record_buckets();
+
+        auto arr = bsoncxx::builder::stream::array{};
+        for (int i = 0; i < counter_buckets.size(); i++) {
+            arr << open_array;
+            for (int j = 0; j < counter_buckets[i].size(); j++) {
+                arr << counter_buckets[i][j];
+            }
+            arr << close_array;
+        }
+
+        auto arr_bytes = bsoncxx::builder::stream::array{};
+        for (int i = 0; i < counter_buckets_bytes.size(); i++) {
+            arr_bytes << open_array;
+            for (int j = 0; j < counter_buckets_bytes[i].size(); j++) {
+                arr_bytes << counter_buckets_bytes[i][j];
+            }
+            arr_bytes << close_array;
+        }
+
+        doc.append(kvp("access_age_buckets", arr));
+        doc.append(kvp("access_age_buckets_bytes", arr_bytes));
+    }
+};
 
 #endif //LRB_BLOOM_H
