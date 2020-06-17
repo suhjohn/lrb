@@ -128,8 +128,9 @@ wiki2018.tr:
     - 2
 #  filter_type:
 #    - Bloom
-  track_access_frequency_hit: 1
-  track_access_resource_hit: 1
+#  track_access_frequency_hit: 1
+#  track_access_resource_hit: 1
+  track_access_age_hit: 1
 
 wiki2019.tr:
   cache_sizes:
@@ -261,5 +262,6 @@ wiki2019.tr:
     - 2
 #  filter_type:
 #    - Bloom
-  track_access_frequency_hit: 1
-  track_access_resource_hit: 1
+#  track_access_frequency_hit: 1
+#  track_access_resource_hit: 1
+  track_access_age_hit: 1
