@@ -141,10 +141,10 @@ class TraceIterator:
 
 class TraceStatistics:
     def __init__(self):
-        self.age_obj_bins = AgeObjectBins(50)
-        self.age_byte_bins = AgeByteBins(50)
-        self.freq_obj_bins = FreqObjectBins(50)
-        self.freq_byte_bins = FreqByteBins(50)
+        self.age_obj_bins = AgeObjectBins(35)
+        self.age_byte_bins = AgeByteBins(35)
+        self.freq_obj_bins = FreqObjectBins(35)
+        self.freq_byte_bins = FreqByteBins(35)
         self.segment_window = 1000000
 
     def record_stat(self):
@@ -154,7 +154,7 @@ class TraceStatistics:
         self.freq_byte_bins.record_stat()
 
     def update(self, index, timestamp, key, size):
-        if index and index % self.segment_window:
+        if index != 0 and index % self.segment_window == 0:
             self.record_stat()
 
         self.age_obj_bins.incr_count(index, key)
