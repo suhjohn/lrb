@@ -436,6 +436,9 @@ bsoncxx::builder::basic::document FrameWork::simulation_results() {
     if (track_access_resource_hit){
         accessResourceCounter->update_stat(value_builder);
     }
+    if (track_access_agehit){
+        accessAgeCounter->update_stat(value_builder);
+    }
     webcache->update_stat(value_builder);
     return value_builder;
 }
