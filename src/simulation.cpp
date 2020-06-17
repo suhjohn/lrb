@@ -80,7 +80,11 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
             int _val = stoi(it->second);
             track_access_resource_hit = _val != 0;
             ++it;
-        } else {
+        } else if(it->first == "track_access_age_hit") {
+            int _val = stoi(it->second);
+            track_access_age_hit = _val != 0;
+            ++it;
+        }else {
             ++it;
         }
     }
