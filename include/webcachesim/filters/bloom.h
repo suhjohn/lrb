@@ -448,8 +448,8 @@ public:
     unordered_map <uint64_t, uint64_t> count_map;
     unordered_map <uint64_t, uint64_t> size_map;
     unordered_map <uint64_t, uint64_t> seq_map;
-    vector <long> current_buckets;
-    vector <vector<long>> counter_buckets;
+    vector <double> current_buckets;
+    vector <vector<double>> counter_buckets;
 
     int bucket_count;
     uint64_t segment_window;
@@ -493,7 +493,7 @@ public:
     }
 
     void record_buckets() {
-        counter_buckets.push_back(vector<int64_t>(current_buckets));
+        counter_buckets.push_back(vector<double>(current_buckets));
         reset_buckets();
     }
 
@@ -520,7 +520,9 @@ public:
     void add_resource(uint64_t key) {
         uint64_t count = count_map[key];
         int index = min(count - 1, current_buckets.size() - 1);
-        auto resource = size_map[key] * (seq - seq_map[key]) / reduction_factor;
+        double size = size_map[key];
+        double eviction_age = seq - seq_map[key];
+        auto resource = size * eviction_age / reduction_factor;
         current_buckets[index] += resource;
     }
 
