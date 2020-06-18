@@ -448,8 +448,8 @@ public:
     unordered_map <uint64_t, uint64_t> count_map;
     unordered_map <uint64_t, uint64_t> size_map;
     unordered_map <uint64_t, uint64_t> seq_map;
-    vector <double> current_buckets;
-    vector <vector<double>> counter_buckets;
+    vector <long> current_buckets;
+    vector <vector<long>> counter_buckets;
 
     int bucket_count;
     uint64_t segment_window;
@@ -521,6 +521,7 @@ public:
         uint64_t count = count_map[key];
         int index = min(count - 1, current_buckets.size() - 1);
         auto resource = size_map[key] * (seq - seq_map[key]) / reduction_factor;
+        cerr << resource;
         current_buckets[index] += resource;
     }
 
