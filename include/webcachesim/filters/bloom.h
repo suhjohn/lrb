@@ -448,8 +448,8 @@ public:
     unordered_map <uint64_t, uint64_t> count_map;
     unordered_map <uint64_t, uint64_t> size_map;
     unordered_map <uint64_t, uint64_t> seq_map;
-    vector <int64_t> current_buckets;
-    vector <vector<int64_t>> counter_buckets;
+    vector <double> current_buckets;
+    vector <vector<double>> counter_buckets;
 
     int bucket_count;
     uint64_t segment_window;
