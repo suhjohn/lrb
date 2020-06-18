@@ -521,7 +521,6 @@ public:
         uint64_t count = count_map[key];
         int index = min(count - 1, current_buckets.size() - 1);
         auto resource = size_map[key] * (seq - seq_map[key]) / reduction_factor;
-        cerr << resource;
         current_buckets[index] += resource;
     }
 
