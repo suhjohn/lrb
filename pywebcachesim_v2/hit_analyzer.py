@@ -1,96 +1,90 @@
 import sys
 import json
 
+class TraceIterator:
+    def __init__(self, file_path):
+        self.i = 0
+        self.key = 0
+        self.size = 0
+        self.file_path = file_path
+        self.file = open(file_path)
+        self.header = json.loads(self.file.readline())
+        self.is_finished = False
+
+    def __iter__(self):
+        self.n = 0
+        return self
+
+    def __next__(self):
+        if self.is_finished:
+            raise StopIteration
+        try:
+            i, key, size = self.file.readline().split(" ")
+        except:
+            self.is_finished = True
+            raise StopIteration
+        # print(f"{self.file_path} {i} {key} {size}")
+        return int(i), int(key), int(size)
+
+class TraceDifference:
+    def __init__(self, trace_iterator_a, trace_iterator_b):
+        self.trace_iterator_a = trace_iterator_a
+        self.trace_iterator_b = trace_iterator_b
+        self.a_unique_hit_bytes = 0
+        self.b_unique_hit_bytes = 0
+
+        a_index, a_key, a_size = -1, -1, -1
+        b_index, b_key, b_size = -1, -1, -1
+        while self.trace_iterator_a.is_finished is False and self.trace_iterator_b.is_finished is False:
+            try:
+                if a_index == b_index:
+                    a_index, a_key, a_size = self.trace_iterator_a.__next__()
+                    b_index, b_key, b_size = self.trace_iterator_b.__next__()
+                elif a_index < b_index:
+                    # print(f"{trace_iterator_a.file_path} += {a_size}")
+                    self.a_unique_hit_bytes += a_size
+                    a_index, a_key, a_size = self.trace_iterator_a.__next__()
+                else:
+                    # print(f"{trace_iterator_b.file_path} += {b_size}")
+                    self.b_unique_hit_bytes += b_size
+                    b_index, b_key, b_size = self.trace_iterator_b.__next__()
+            except:
+                continue
+
+        if self.trace_iterator_a.is_finished is False:
+            while self.trace_iterator_a.is_finished is False:
+                try:
+                    if a_index == b_index:
+                        a_index, a_key, a_size = self.trace_iterator_a.__next__()
+                    else:
+                        # print(f"{trace_iterator_a.file_path} += {b_size}")
+                        self.a_unique_hit_bytes += a_size
+                        a_index, a_key, a_size = self.trace_iterator_a.__next__()
+                except:
+                    continue
+
+        else:
+            while self.trace_iterator_b.is_finished is False:
+                try:
+                    if a_index == b_index:
+                        b_index, b_key, b_size = self.trace_iterator_b.__next__()
+                    else:
+                        # print(f"{trace_iterator_b.file_path} += {b_size}")
+                        self.b_unique_hit_bytes += b_size
+                        b_index, b_key, b_size = self.trace_iterator_b.__next__()
+                except:
+                    continue
+
+
 filepath_1 = sys.argv[1]
 filepath_2 = sys.argv[2]
-
-f1 = open(filepath_1)
-f2 = open(filepath_2)
-f1_header = json.loads(f1.readline())
-f2_header = json.loads(f2.readline())
-f1_unique_hit_bytes = 0
-f2_unique_hit_bytes = 0
-
-incr_f1 = True
-incr_f2 = True
-f1_complete = False
-f2_complete = False
-i = 0
-early_stop = -1
-while True:
-    if i == early_stop:
-        f1_complete = True
-        f2_complete = True
-        break
-    if incr_f1:
-        try:
-            f1_index, f1_key, f1_size = f1.readline().split(" ")
-            f1_index, f1_key, f1_size = int(f1_index), int(f1_key), int(f1_size)
-        except:
-            f1_complete = True
-            break
-    if incr_f2:
-        try:
-            f2_index, f2_key, f2_size = f2.readline().split(" ")
-            f2_index, f2_key, f2_size = int(f2_index), int(f2_key), int(f2_size)
-        except:
-            f2_complete = True
-            break
-
-    # print(f"{i} ({f1_index}, {f1_key}, {f1_size}), ({f2_index}, {f2_key}, {f2_size})")
-    if f1_index < f2_index:
-        incr_f1 = True
-        incr_f2 = False
-        # print(f"    increment for f1: {f1_key}")
-        f1_unique_hit_bytes += f1_size
-    elif f1_index > f2_index:
-        incr_f1 = False
-        incr_f2 = True
-        # print(f"    increment for f2: {f2_key}")
-        f2_unique_hit_bytes += f2_size
-    else:
-        incr_f1 = True
-        incr_f2 = True
-        if f1_key != f2_key:
-            # print(f"increment for {f1_key} {f2_key}")
-            f1_unique_hit_bytes += f1_size
-            f2_unique_hit_bytes += f2_size
-
-    i += 1
-
-if not f1_complete:
-    while True:
-        try:
-            f1_index, f1_key, f1_size = f1.readline().split(" ")
-            f1_index, f1_key, f1_size = int(f1_index), int(f1_key), int(f1_size)
-        except:
-            break
-        if f1_index != f2_index:
-            f1_unique_hit_bytes += f1_size
-        else:
-            if f1_key != f2_key:
-                f1_unique_hit_bytes += f1_size
-                f2_unique_hit_bytes += f2_size
-elif not f2_complete:
-    while True:
-        try:
-            f2_index, f2_key, f2_size = f2.readline().split(" ")
-            f2_index, f2_key, f2_size = int(f2_index), int(f2_key), int(f2_size)
-        except:
-            break
-        if f1_index != f2_index:
-            f1_unique_hit_bytes += f1_size
-        else:
-            if f1_key != f2_key:
-                f1_unique_hit_bytes += f1_size
-                f2_unique_hit_bytes += f2_size
-
-f1.close()
-f2.close()
+trace_iterator_a = TraceIterator(filepath_1)
+trace_iterator_b = TraceIterator(filepath_2)
+td = TraceDifference(trace_iterator_a, trace_iterator_b)
 with open(f"{filepath_1}_X_{filepath_2}.json", "w") as f:
     json.dump({
-        "f1_unique_hit_bytes": f1_unique_hit_bytes,
-        "f2_unique_hit_bytes": f2_unique_hit_bytes,
-        "f1": f1_header,
-        "f2": f2_header
+        "f1_unique_hit_bytes": td.a_unique_hit_bytes,
+        "f2_unique_hit_bytes": td.b_unique_hit_bytes,
+        "f1": trace_iterator_a.header,
+        "f2": trace_iterator_b.header
     }, f)

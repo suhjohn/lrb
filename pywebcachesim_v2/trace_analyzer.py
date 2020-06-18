@@ -145,7 +145,7 @@ class TraceStatistics:
         self.age_byte_bins = AgeByteBins(35)
         self.freq_obj_bins = FreqObjectBins(35)
         self.freq_byte_bins = FreqByteBins(35)
-        self.segment_window = 1000000
+        self.segment_window = 10000000
 
     def record_stat(self):
         self.age_obj_bins.record_stat()
