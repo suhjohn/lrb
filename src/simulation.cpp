@@ -29,6 +29,8 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
     _cache_size = cache_size;
     is_offline = offline_algorithms.count(_cache_type);
     uint64_t access_resource_counter_window = 1000000;
+    int access_resource_counter_reduction_factor = 1;
+
     for (auto it = params.cbegin(); it != params.cend();) {
         if (it->first == "uni_size") {
             uni_size = static_cast<bool>(stoi(it->second));
@@ -82,6 +84,9 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
             ++it;
         } else if(it->first == "access_resource_counter_window") {
             access_resource_counter_window = stoull(it->second);
+            ++it;
+        } else if (it->first == "access_resource_counter_reduction_factor"){
+            access_resource_counter_reduction_factor = stoi(it->second);
             ++it;
         } else if(it->first == "track_access_age_hit") {
             int _val = stoi(it->second);
@@ -138,7 +143,8 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
         accessFrequencyCounter = new AccessFrequencyCounter(trace_file, n_extra_fields, n_early_stop);
     }
     if (track_access_resource_hit) {
-        accessResourceCounter = new AccessResourceCounter(trace_file, n_extra_fields, n_early_stop, access_resource_counter_window);
+        accessResourceCounter = new AccessResourceCounter(trace_file, n_extra_fields,
+                n_early_stop, access_resource_counter_window, access_resource_counter_reduction_factor);
     }
     if (track_access_age_hit) {
         accessAgeCounter = new AccessAgeCounter(trace_file, n_extra_fields, n_early_stop);

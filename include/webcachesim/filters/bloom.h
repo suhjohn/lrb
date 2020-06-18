@@ -454,14 +454,16 @@ public:
     int bucket_count;
     uint64_t segment_window;
     int seq = 0;
+    int reduction_factor;
 
     AccessResourceCounter(
             const string &trace_file, uint n_extra_fields,
             int64_t n_early_stop = -1, uint64_t _segment_window = 1000000,
-            int _bucket_count = 4) {
+            int _reduction_factor = 1, int _bucket_count = 4) {
         cerr << "init AccessResourceCounter" << endl;
         bucket_count = _bucket_count;
         segment_window = _segment_window;
+        reduction_factor = _reduction_factor;
 
         for (int i = 0; i < bucket_count; i++) {
             current_buckets.push_back(0);
@@ -518,7 +520,7 @@ public:
     void add_resource(uint64_t key) {
         uint64_t count = count_map[key];
         int index = min(count - 1, current_buckets.size() - 1);
-        auto resource = size_map[key] * (seq - seq_map[key]);
+        auto resource = size_map[key] * (seq - seq_map[key]) / reduction_factor;
         current_buckets[index] += resource;
     }
 
@@ -540,6 +542,7 @@ public:
         }
 
         doc.append(kvp("access_resource_buckets", arr));
+        doc.append(kvp("access_resource_counter_reduction_factor", reduction_factor));
     }
 };
 
