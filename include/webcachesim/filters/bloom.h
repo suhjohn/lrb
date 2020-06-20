@@ -648,7 +648,7 @@ public:
         uint64_t seq = req.get_t() + 1;
         uint64_t key = req.get_id();
         int age = seq_age_map[seq];
-        int64_t count = count_map[key];
+        int count = count_map[key];
 
         // get bits of age
         uint64_t bits, var = (age < 0) ? -age : age;
