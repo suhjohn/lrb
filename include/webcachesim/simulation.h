@@ -35,6 +35,7 @@ public:
     bool is_metadata_in_cache_size = true;
     unique_ptr<Cache> webcache = nullptr;
     unique_ptr <Filter> filter = nullptr;
+    uint64_t filter_bytes_used = 0;
     int version = 2;
     std::ifstream infile;
     int64_t n_early_stop = -1;  //-1: no stop

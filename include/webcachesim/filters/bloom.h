@@ -32,68 +32,6 @@ using bsoncxx::builder::stream::close_document;
 
 using namespace std;
 
-class SetFilter : public Filter {
-public:
-    SetFilter() : Filter() {}
-
-    void init_with_params(const std::map <std::string, std::string> &params) override {
-        for (auto &it: params) {
-            if (it.first == "max_n_element") {
-                std::istringstream iss(it.second);
-                size_t new_n;
-                iss >> new_n;
-                max_n_element = new_n;
-            } else if (it.first == "filter_k") {
-                k = stoi(it.second);
-            } else if (it.first == "bloom_record_reset") {
-                int _val = stoi(it.second);
-                record_reset = _val != 0;
-            } else {
-                cerr << "Set filter unrecognized parameter: " << it.first << endl;
-            }
-        }
-        cerr << "Init Set filter. max_n_element: " << max_n_element << " k: " << k << endl;
-        for (int i = 0; i < k; i++) {
-            unordered_set <uint64_t> filter;
-            filters.push_back(filter);
-        }
-
-        BloomFilter *bloom_filter = new BloomFilter();
-        bloom_filter->init_with_params(params);
-        _total_bytes_used = bloom_filter->total_bytes_used();
-        delete bloom_filter;
-    }
-
-    size_t total_bytes_used() override {
-        return 0;
-    }
-
-    void update_stat(bsoncxx::v_noabi::builder::basic::document &doc) override {
-        doc.append(kvp("filter_size", std::to_string(total_bytes_used())));
-        doc.append(kvp("max_n_element", std::to_string(max_n_element)));
-        doc.append(kvp("filter_k", k));
-        if (record_reset) {
-            doc.append(kvp("refresh_indices", [this](sub_array child) {
-                for (const auto &element : refresh_indices)
-                    child.append(element);
-            }));
-        }
-    }
-
-    bool should_filter(SimpleRequest &req) override;
-
-    size_t _total_bytes_used = 0;
-    size_t max_n_element = 40000000;
-    uint16_t curr_filter_idx = 0;
-    int n_added_obj = 0;
-    int k = 2;
-    bool record_reset = false;
-    std::vector <int64_t> refresh_indices;
-    std::vector <unordered_set<uint64_t>> filters;
-};
-
-static FilterFactory <SetFilter> factorySetFilter("Set");
-
 class BloomFilter : public Filter {
 public:
     BloomFilter() : Filter() {}
@@ -158,6 +96,69 @@ public:
 };
 
 static FilterFactory <BloomFilter> factoryBloomFilter("Bloom");
+
+
+class SetFilter : public Filter {
+public:
+    SetFilter() : Filter() {}
+
+    void init_with_params(const std::map <std::string, std::string> &params) override {
+        for (auto &it: params) {
+            if (it.first == "max_n_element") {
+                std::istringstream iss(it.second);
+                size_t new_n;
+                iss >> new_n;
+                max_n_element = new_n;
+            } else if (it.first == "filter_k") {
+                k = stoi(it.second);
+            } else if (it.first == "bloom_record_reset") {
+                int _val = stoi(it.second);
+                record_reset = _val != 0;
+            } else {
+                cerr << "Set filter unrecognized parameter: " << it.first << endl;
+            }
+        }
+        cerr << "Init Set filter. max_n_element: " << max_n_element << " k: " << k << endl;
+        for (int i = 0; i < k; i++) {
+            unordered_set <uint64_t> filter;
+            filters.push_back(filter);
+        }
+
+        BloomFilter *bloom_filter = new BloomFilter();
+        bloom_filter->init_with_params(params);
+        _total_bytes_used = bloom_filter->total_bytes_used();
+        delete bloom_filter;
+    }
+
+    size_t total_bytes_used() override {
+        return _total_bytes_used;
+    }
+
+    void update_stat(bsoncxx::v_noabi::builder::basic::document &doc) override {
+        doc.append(kvp("filter_size", std::to_string(total_bytes_used())));
+        doc.append(kvp("max_n_element", std::to_string(max_n_element)));
+        doc.append(kvp("filter_k", k));
+        if (record_reset) {
+            doc.append(kvp("refresh_indices", [this](sub_array child) {
+                for (const auto &element : refresh_indices)
+                    child.append(element);
+            }));
+        }
+    }
+
+    bool should_filter(SimpleRequest &req) override;
+
+    size_t _total_bytes_used = 0;
+    size_t max_n_element = 40000000;
+    uint16_t curr_filter_idx = 0;
+    int n_added_obj = 0;
+    int k = 2;
+    bool record_reset = false;
+    std::vector <int64_t> refresh_indices;
+    std::vector <unordered_set<uint64_t>> filters;
+};
+
+static FilterFactory <SetFilter> factorySetFilter("Set");
 
 class CountingSetFilter : public Filter {
 public:

@@ -151,12 +151,11 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
     }
 
     // set admission filter
-    uint64_t total_bytes_used = 0;
     if (bloom_filter) {
         filter = move(Filter::create_unique("Bloom"));
         filter->init_with_params(params);
         cerr << "Subtracting filter size " << filter->total_bytes_used() << " bytes from cache size" << endl;
-        total_bytes_used = filter->total_bytes_used();
+        filter_bytes_used = filter->total_bytes_used();
     } else if (params.count("filter_type")) {
         auto filter_type = params["filter_type"];
         filter = move(Filter::create_unique(filter_type));
@@ -166,9 +165,9 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
         }
         filter->init_with_params(params);
         cerr << "Subtracting filter size " << filter->total_bytes_used() << " bytes from cache size" << endl;
-        total_bytes_used = filter->total_bytes_used();
+        filter_bytes_used = filter->total_bytes_used();
     }
-    if (total_bytes_used > cache_size) {
+    if (filter_bytes_used > cache_size) {
         cerr << "filter size is greater than available memory!" << endl;
         abort();
     }
@@ -179,7 +178,7 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
         cerr << "cache type not implemented" << endl;
         abort();
     }
-
+    _cache_size -= filter_bytes_used;
     // configure cache size
     webcache->setSize(_cache_size);
     webcache->init_with_params(params);
@@ -240,11 +239,11 @@ void FrameWork::update_stats() {
     auto metadata_overhead = get_rss();
     seg_rss.emplace_back(metadata_overhead);
     if (is_metadata_in_cache_size) {
-        if (_cache_size - metadata_overhead > _cache_size) {
+        if (_cache_size - metadata_overhead + filter_bytes_used  > _cache_size) {
             cerr << "cache size overflow from metadata." << endl;
             exit(-1);
         }
-        webcache->setSize(_cache_size - metadata_overhead);
+        webcache->setSize(_cache_size - metadata_overhead + filter_bytes_used );
     }
     cerr << "rss: " << metadata_overhead << endl;
     webcache->update_stat_periodic();
