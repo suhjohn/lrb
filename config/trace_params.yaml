@@ -1,7 +1,8 @@
 wiki2018.tr:
 #  is_metadata_in_cache_size: 0
   cache_sizes:
-    - 68719476736:
+    - 68719476736
+#    - 68719476736:
 #        LRU:
 #          max_n_element:
 #            - 40000000
@@ -35,7 +36,7 @@ wiki2018.tr:
 #        LRU:
 #          max_n_element:
 #            - 40000000
-#            - 1000000
+#            - 262144
 #        LRB:
 #          memory_window:
 #            - 335544320
@@ -138,16 +139,17 @@ wiki2018.tr:
 wiki2019.tr:
 #  is_metadata_in_cache_size: 0
   cache_sizes:
-    - 68719476736:
+  - 68719476736
+#    - 68719476736:
 #        LRU:
 #          max_n_element:
 #            - 40000000
 #            - 400000
-        LRB:
-          memory_window:
-            - 58720256
-          byte_million_req:
-            - 35234263115
+#        LRB:
+#          memory_window:
+#            - 58720256
+#          byte_million_req:
+#            - 35234263115
 #    - 137438953472:
 #        LRU:
 #          max_n_element:
@@ -182,7 +184,7 @@ wiki2019.tr:
 #        LRU:
 #          max_n_element:
 #            - 40000000
-#            - 3600000
+#            - 1000000
 #        LRB:
 #          memory_window:
 #            - 671088640
