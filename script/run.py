@@ -103,7 +103,7 @@ class WebcachesimExecutor:
         with open(job_file) as f:
             execution_settings = yaml.load(f, Loader=yaml.FullLoader)
         nodes = execution_settings["nodes"]
-        # self._setup_nodes(nodes)
+        self._setup_nodes(nodes)
         self._send_telegram("[task_id] Setup complete")
 
         command = f"{PYTHON} {WEBCACHESIM_ROOT}/pywebcachesim_v2/simulate.py " \
@@ -148,5 +148,4 @@ class WebcachesimExecutor:
 
 if __name__ == '__main__':
     executor = WebcachesimExecutor("config", DBURI, TELEGRAM_API_KEY, TELEGRAM_CHAT_ID)
-    # executor.run()
-
+    executor.run()
