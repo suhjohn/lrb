@@ -45,7 +45,7 @@ public:
                 max_n_element = new_n;
             } else if (it.first == "filter_k") {
                 k = stoi(it.second);
-            } else if (it.first == "bloom_record_reset"){
+            } else if (it.first == "bloom_record_reset") {
                 int _val = stoi(it.second);
                 record_reset = _val != 0;
             } else {
@@ -57,6 +57,11 @@ public:
             unordered_set <uint64_t> filter;
             filters.push_back(filter);
         }
+
+        BloomFilter *bloom_filter = new BloomFilter();
+        bloom_filter->init_with_params(params);
+        _total_bytes_used = bloom_filter->total_bytes_used();
+        delete bloom_filter;
     }
 
     size_t total_bytes_used() override {
@@ -77,6 +82,7 @@ public:
 
     bool should_filter(SimpleRequest &req) override;
 
+    size_t _total_bytes_used = 0;
     size_t max_n_element = 40000000;
     uint16_t curr_filter_idx = 0;
     int n_added_obj = 0;
@@ -103,10 +109,10 @@ public:
                 k = stoi(it.second);
             } else if (it.first == "fp_rate") {
                 fp_rate = stod(it.second);
-            } else if (it.first == "bloom_record_reset"){
+            } else if (it.first == "bloom_record_reset") {
                 int _val = stoi(it.second);
                 record_reset = _val != 0;
-            }else {
+            } else {
                 cerr << "Bloom filter unrecognized parameter: " << it.first << endl;
             }
         }
@@ -467,7 +473,7 @@ public:
     unordered_map <uint64_t, uint64_t> count_map;
     unordered_map <uint64_t, uint64_t> size_map;
     unordered_map <uint64_t, uint64_t> seq_map;
-    vector <double> current_buckets;
+    vector<double> current_buckets;
     vector <vector<double>> counter_buckets;
 
     int bucket_count;
@@ -571,10 +577,11 @@ public:
 class AccessAgeCounter {
 public:
     unordered_map<int, int> seq_age_map;
-    unordered_map <uint64_t, int> count_map;
+    unordered_map<uint64_t, int> count_map;
 
-    vector <vector <int64_t>> current_buckets_bytes;
-    vector <vector <vector<int64_t>>> counter_buckets_bytes;
+    vector <vector<int64_t>> current_buckets_bytes;
+    vector <vector<vector < int64_t>>>
+    counter_buckets_bytes;
 
     int bucket_count;
     int freq_bucket_count;
@@ -592,7 +599,7 @@ public:
 
         for (int i = 0; i < bucket_count; i++) {
             vector <int64_t> frequency_buckets;
-            for (int j = 0; j < _freq_bucket_count; j++){
+            for (int j = 0; j < _freq_bucket_count; j++) {
                 frequency_buckets.push_back(0);
             }
             current_buckets_bytes.push_back(frequency_buckets);
@@ -624,7 +631,7 @@ public:
 
     void reset_buckets() {
         for (int i = 0; i < bucket_count; i++) {
-            for (int j = 0; j < freq_bucket_count; j++){
+            for (int j = 0; j < freq_bucket_count; j++) {
                 current_buckets_bytes[i][j] = 0;
             }
         }
@@ -632,7 +639,7 @@ public:
 
     void record_buckets() {
         counter_buckets_bytes.push_back(
-                vector<vector<int64_t>>(current_buckets_bytes)
+                vector < vector < int64_t >> (current_buckets_bytes)
         );
         reset_buckets();
     }
@@ -667,7 +674,7 @@ public:
             arr_bytes << open_array;
             for (int j = 0; j < bucket_count; j++) {
                 arr_bytes << open_array;
-                for (int k = 0; k < freq_bucket_count; k++){
+                for (int k = 0; k < freq_bucket_count; k++) {
                     arr_bytes << counter_buckets_bytes[i][j][k];
                 }
                 arr_bytes << close_array;
