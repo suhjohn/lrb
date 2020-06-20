@@ -32,11 +32,11 @@ wiki2018.tr:
 #            - 167772160
 #          byte_million_req:
 #            - 35234263115
-    - 549755813888:
-        LRU:
-          max_n_element:
-            - 40000000
-            - 262144
+    - 549755813888
+#        LRU:
+#          max_n_element:
+#            - 40000000
+#            - 262144
 #        LRB:
 #          memory_window:
 #            - 335544320
@@ -128,8 +128,8 @@ wiki2018.tr:
 #  bloom_track_fp: 1
   version:
     - 2
-  filter_type:
-    - Set
+#  filter_type:
+#    - Set
 #  access_resource_counter_window: 100000
 #  access_resource_counter_reduction_factor: 100000
 #  track_access_frequency_hit: 1
@@ -181,11 +181,11 @@ wiki2019.tr:
 #            - 335544320
 #          byte_million_req:
 #            - 35234263115
-    - 1099511627776:
-        LRU:
-          max_n_element:
-            - 40000000
-            - 1000000
+    - 1099511627776
+#        LRU:
+#          max_n_element:
+#            - 40000000
+#            - 1000000
 #        LRB:
 #          memory_window:
 #            - 671088640
@@ -267,8 +267,8 @@ wiki2019.tr:
 #  bloom_track_fp: 1
   version:
     - 2
-  filter_type:
-    - Set
+#  filter_type:
+#    - Set
 #  access_resource_counter_window: 100000
 #  access_resource_counter_reduction_factor: 100000
 #  track_access_frequency_hit: 1
