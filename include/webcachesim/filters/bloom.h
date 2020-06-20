@@ -104,7 +104,7 @@ public:
             } else if (it.first == "fp_rate") {
                 fp_rate = stod(it.second);
             } else if (it.first == "bloom_record_reset"){
-                int _val = stoi(it->second);
+                int _val = stoi(it.second);
                 record_reset = _val != 0;
             }else {
                 cerr << "Bloom filter unrecognized parameter: " << it.first << endl;
