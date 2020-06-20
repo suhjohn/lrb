@@ -45,6 +45,9 @@ public:
                 max_n_element = new_n;
             } else if (it.first == "filter_k") {
                 k = stoi(it.second);
+            } else if (it.first == "bloom_record_reset"){
+                int _val = stoi(it->second);
+                record_reset = _val != 0;
             } else {
                 cerr << "Set filter unrecognized parameter: " << it.first << endl;
             }
@@ -64,6 +67,12 @@ public:
         doc.append(kvp("filter_size", std::to_string(total_bytes_used())));
         doc.append(kvp("max_n_element", std::to_string(max_n_element)));
         doc.append(kvp("filter_k", k));
+        if (record_reset) {
+            doc.append(kvp("refresh_indices", [this](sub_array child) {
+                for (const auto &element : refresh_indices)
+                    child.append(element);
+            }));
+        }
     }
 
     bool should_filter(SimpleRequest &req) override;
@@ -72,7 +81,8 @@ public:
     uint16_t curr_filter_idx = 0;
     int n_added_obj = 0;
     int k = 2;
-
+    bool record_reset = false;
+    std::vector <int64_t> refresh_indices;
     std::vector <unordered_set<uint64_t>> filters;
 };
 
@@ -93,7 +103,10 @@ public:
                 k = stoi(it.second);
             } else if (it.first == "fp_rate") {
                 fp_rate = stod(it.second);
-            } else {
+            } else if (it.first == "bloom_record_reset"){
+                int _val = stoi(it->second);
+                record_reset = _val != 0;
+            }else {
                 cerr << "Bloom filter unrecognized parameter: " << it.first << endl;
             }
         }
@@ -118,6 +131,12 @@ public:
         doc.append(kvp("fp_rate", std::to_string(fp_rate)));
         doc.append(kvp("bloom_k", k));
         doc.append(kvp("filter_k", k));
+        if (record_reset) {
+            doc.append(kvp("refresh_indices", [this](sub_array child) {
+                for (const auto &element : refresh_indices)
+                    child.append(element);
+            }));
+        }
     }
 
     bool should_filter(SimpleRequest &req) override;
@@ -127,7 +146,8 @@ public:
     uint16_t curr_filter_idx = 0;
     int n_added_obj = 0;
     int k = 2;
-
+    bool record_reset = false;
+    std::vector <int64_t> refresh_indices;
     std::vector<bf::basic_bloom_filter *> filters;
 };
 

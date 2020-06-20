@@ -6,6 +6,7 @@
 
 bool BloomFilter::should_filter(SimpleRequest &req) {
     auto key = req.get_id();
+    auto t = req.get_t();
     for (int i = 0; i < k; i++) {
         if (filters[i]->lookup(key)) {
             return false;
@@ -16,6 +17,10 @@ bool BloomFilter::should_filter(SimpleRequest &req) {
         curr_filter_idx = (curr_filter_idx + 1) % k;
         filters[curr_filter_idx]->clear();
         n_added_obj = 0;
+        if (record_reset) {
+            refresh_indices.push_back(t);
+        }
+
     }
     filters[curr_filter_idx]->add(key);
     // keep track of number of requests for the current filter
@@ -26,6 +31,7 @@ bool BloomFilter::should_filter(SimpleRequest &req) {
 
 bool SetFilter::should_filter(SimpleRequest &req) {
     auto key = req.get_id();
+    auto t = req.get_t();
     for (int i = 0; i < k; i++) {
         if (filters[i].find(key) != filters[i].end()) {
             return false;
@@ -36,6 +42,9 @@ bool SetFilter::should_filter(SimpleRequest &req) {
         curr_filter_idx = (curr_filter_idx + 1) % k;
         filters[curr_filter_idx].clear();
         n_added_obj = 0;
+        if (record_reset) {
+            refresh_indices.push_back(t);
+        }
     }
     filters[curr_filter_idx].insert(key);
     // keep track of number of requests for the current filter
