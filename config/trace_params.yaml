@@ -1,5 +1,4 @@
 wiki2018.tr:
-  is_metadata_in_cache_size: 0
   cache_sizes:
 #    - 68719476736:
 #        LRU:
@@ -136,7 +135,6 @@ wiki2018.tr:
 #  track_access_age_hit: 1
 
 wiki2019.tr:
-  is_metadata_in_cache_size: 0
   cache_sizes:
 #    - 68719476736:
 #        LRU:

@@ -144,7 +144,7 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
     }
     if (track_access_resource_hit) {
         accessResourceCounter = new AccessResourceCounter(trace_file, n_extra_fields,
-                n_early_stop, access_resource_counter_window, access_resource_counter_reduction_factor);
+                                                          n_early_stop, access_resource_counter_window, access_resource_counter_reduction_factor);
     }
     if (track_access_age_hit) {
         accessAgeCounter = new AccessAgeCounter(trace_file, n_extra_fields, n_early_stop);
@@ -172,7 +172,6 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
         cerr << "filter size is greater than available memory!" << endl;
         abort();
     }
-    _cache_size -= total_bytes_used;
     //set cache_type related
     // create cache
     webcache = move(Cache::create_unique(cache_type));
@@ -241,6 +240,10 @@ void FrameWork::update_stats() {
     auto metadata_overhead = get_rss();
     seg_rss.emplace_back(metadata_overhead);
     if (is_metadata_in_cache_size) {
+        if (_cache_size - metadata_overhead > _cache_size) {
+            cerr << "cache size overflow from metadata." << endl;
+            exit(-1);
+        }
         webcache->setSize(_cache_size - metadata_overhead);
     }
     cerr << "rss: " << metadata_overhead << endl;
