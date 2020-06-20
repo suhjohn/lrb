@@ -46,7 +46,7 @@ public:
             } else if (it.first == "filter_k") {
                 k = stoi(it.second);
             } else if (it.first == "bloom_record_reset"){
-                int _val = stoi(it->second);
+                int _val = stoi(it.second);
                 record_reset = _val != 0;
             } else {
                 cerr << "Set filter unrecognized parameter: " << it.first << endl;
@@ -571,7 +571,7 @@ public:
 class AccessAgeCounter {
 public:
     unordered_map<int, int> seq_age_map;
-    unordered_map <uint64_t, uint64_t> count_map;
+    unordered_map <uint64_t, int> count_map;
 
     vector <vector <int64_t>> current_buckets_bytes;
     vector <vector <vector<int64_t>>> counter_buckets_bytes;
@@ -645,9 +645,10 @@ public:
     }
 
     void insert(SimpleRequest &req) {
-        uint64_t key = req.get_t() + 1;
-        int age = seq_age_map[key];
-        uint64_t count = count_map[key];
+        uint64_t seq = req.get_t() + 1;
+        uint64_t key = req.get_id();
+        int age = seq_age_map[seq];
+        int64_t count = count_map[key];
 
         // get bits of age
         uint64_t bits, var = (age < 0) ? -age : age;
