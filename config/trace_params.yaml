@@ -144,7 +144,7 @@ wiki2018.tr:
 
 
 wiki2019.tr:
-#  is_metadata_in_cache_size: 0
+  is_metadata_in_cache_size: 0
   cache_sizes:
 #  - 68719476736
   - 137438953472
