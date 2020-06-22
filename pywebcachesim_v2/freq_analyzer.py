@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from collections import defaultdict, Counter
+from collections import defaultdict, Counter, deque
 
 import os
 
@@ -141,14 +141,14 @@ class TraceIterator:
 
 class FreqObjBinsWindow:
     def __init__(self, window_size):
-        self.sliding_window = []
+        self.sliding_window = deque()
         self.counter = Counter()
         self.freq_bins = [0, 0, 0]
         self.window_size = window_size
 
     def incr_count(self, index, key, size):
         if len(self.sliding_window) > self.window_size:
-            key = self.sliding_window.pop(0)
+            key = self.sliding_window.popleft()
             del self.counter[key]
         self.sliding_window.append(key)
         self.counter[key] += 1
@@ -186,6 +186,8 @@ def analyze(trace_filepath):
     trace_iterator = TraceIterator(trace_filepath)
     for trace in trace_iterator:
         index, timestamp, key, size = trace
+        if index != 0 and index % 100000 == 0:
+            print(f"[analyze] {index}")
         trace_statistics.update(index, timestamp, key, size)
     result = trace_statistics.get_result()
     result["trace_file"] = trace_filepath.split("/")[-1]
