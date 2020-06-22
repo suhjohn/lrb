@@ -580,9 +580,15 @@ public:
     unordered_map<int, int> seq_age_map;
     unordered_map<uint64_t, int> count_map;
 
-    vector <vector<int64_t>> current_buckets_bytes;
+    vector <vector<int64_t>> obj_freq_buckets;
     vector <vector<vector < int64_t>>>
-    counter_buckets_bytes;
+    obj_freq_buckets_list;
+
+    vector <vector<int64_t>> req_freq_buckets;
+    vector <vector<vector < int64_t>>>
+    req_freq_buckets_list;
+
+    CountingSetFilter *filter;
 
     int bucket_count;
     int freq_bucket_count;
@@ -599,11 +605,15 @@ public:
         segment_window = _segment_window;
 
         for (int i = 0; i < bucket_count; i++) {
-            vector <int64_t> frequency_buckets;
+            vector <int64_t> obj_freq_bucket_base;
+            vector <int64_t> req_freq_bucket_base;
+
             for (int j = 0; j < _freq_bucket_count; j++) {
-                frequency_buckets.push_back(0);
+                obj_freq_bucket_base.push_back(0);
+                req_freq_bucket_base.push_back(0);
             }
-            current_buckets_bytes.push_back(frequency_buckets);
+            obj_freq_buckets.push_back(obj_freq_bucket_base);
+            req_freq_buckets.push_back(req_freq_bucket_base);
         }
 
         // count object count until n_early_stop
@@ -630,17 +640,31 @@ public:
         seq = 1;
     }
 
+    void init_req_counter(const std::map <std::string, std::string> &params) {
+        filter = new CountingSetFilter();
+        filter->init_with_params(params);
+    }
+
+    void incr_req_count(SimpleRequest &req) {
+        auto size = req.get_size();
+        filter->should_filter(req);
+    }
+
     void reset_buckets() {
         for (int i = 0; i < bucket_count; i++) {
             for (int j = 0; j < freq_bucket_count; j++) {
-                current_buckets_bytes[i][j] = 0;
+                obj_freq_buckets[i][j] = 0;
+                req_freq_buckets[i][j] = 0;
             }
         }
     }
 
     void record_buckets() {
-        counter_buckets_bytes.push_back(
-                vector < vector < int64_t >> (current_buckets_bytes)
+        obj_freq_buckets_list.push_back(
+                vector < vector < int64_t >> (obj_freq_buckets)
+        );
+        req_freq_buckets_list.push_back(
+                vector < vector < int64_t >> (req_freq_buckets)
         );
         reset_buckets();
     }
@@ -656,34 +680,53 @@ public:
         uint64_t seq = req.get_t() + 1;
         uint64_t key = req.get_id();
         int age = seq_age_map[seq];
-        int count = count_map[key];
+        int obj_count = count_map[key];
+        int req_count = filter->count(req);
 
         // get bits of age
         uint64_t bits, var = (age < 0) ? -age : age;
         for (bits = 0; var != 0; ++bits) var >>= 1;
 
-        int i = min(bits, current_buckets_bytes.size() - 1);
-        int j = min(count - 1, freq_bucket_count - 1);
-        current_buckets_bytes[i][j] += req.get_size();
+        int i = min(bits, obj_freq_buckets.size() - 1);
+        int obj_j = min(obj_count - 1, freq_bucket_count - 1);
+        int req_j = min(req_count - 1, freq_bucket_count - 1);
+        obj_freq_buckets[i][obj_j] += req.get_size();
+        req_freq_buckets[i][req_j] += req.get_size();
     }
 
     void update_stat(bsoncxx::v_noabi::builder::basic::document &doc) {
         record_buckets();
 
-        auto arr_bytes = bsoncxx::builder::stream::array{};
-        for (int i = 0; i < counter_buckets_bytes.size(); i++) {
-            arr_bytes << open_array;
+        auto bytes_classified_by_obj_freq = bsoncxx::builder::stream::array{};
+        auto bytes_classified_by_req_freq = bsoncxx::builder::stream::array{};
+
+        for (int i = 0; i < obj_freq_buckets_list.size(); i++) {
+            bytes_classified_by_obj_freq << open_array;
             for (int j = 0; j < bucket_count; j++) {
-                arr_bytes << open_array;
+                bytes_classified_by_obj_freq << open_array;
                 for (int k = 0; k < freq_bucket_count; k++) {
-                    arr_bytes << counter_buckets_bytes[i][j][k];
+                    bytes_classified_by_obj_freq << obj_freq_buckets_list[i][j][k];
                 }
-                arr_bytes << close_array;
+                bytes_classified_by_obj_freq << close_array;
             }
-            arr_bytes << close_array;
+            bytes_classified_by_obj_freq << close_array;
         }
 
-        doc.append(kvp("access_age_buckets_bytes", arr_bytes));
+
+        for (int i = 0; i < req_freq_buckets_list.size(); i++) {
+            bytes_classified_by_req_freq << open_array;
+            for (int j = 0; j < bucket_count; j++) {
+                bytes_classified_by_req_freq << open_array;
+                for (int k = 0; k < freq_bucket_count; k++) {
+                    bytes_classified_by_req_freq << obj_freq_buckets_list[i][j][k];
+                }
+                bytes_classified_by_req_freq << close_array;
+            }
+            bytes_classified_by_req_freq << close_array;
+        }
+
+        doc.append(kvp("access_age_buckets_obj_freq_bytes", bytes_classified_by_obj_freq));
+        doc.append(kvp("access_age_buckets_req_freq_bytes", bytes_classified_by_req_freq));
     }
 };
 

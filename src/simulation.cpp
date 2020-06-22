@@ -133,22 +133,6 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
         string json_result = bsoncxx::to_json(value_builder.view());
         cache_hit_ofstream << json_result << endl;
     }
-    if (bloom_track_k_hit) {
-        kHitCounter = new KHitCounter(params);
-    }
-    if (bloom_track_fp) {
-        fpCounter = new FPCounter(params);
-    }
-    if (track_access_frequency_hit) {
-        accessFrequencyCounter = new AccessFrequencyCounter(trace_file, n_extra_fields, n_early_stop);
-    }
-    if (track_access_resource_hit) {
-        accessResourceCounter = new AccessResourceCounter(trace_file, n_extra_fields,
-                                                          n_early_stop, access_resource_counter_window, access_resource_counter_reduction_factor);
-    }
-    if (track_access_age_hit) {
-        accessAgeCounter = new AccessAgeCounter(trace_file, n_extra_fields, n_early_stop);
-    }
 
     // set admission filter
     if (bloom_filter) {
@@ -182,13 +166,31 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
     // configure cache size
     webcache->setSize(_cache_size);
     webcache->init_with_params(params);
+
     if (track_access_resource_hit) {
         auto f = bind(&AccessResourceCounter::on_evict, accessResourceCounter, placeholders::_1);
         webcache->addEvictionCallback(f);
     }
-
     if (params.count("version")) {
         version = stoi(params["version"]);
+    }
+    if (bloom_track_k_hit) {
+        kHitCounter = new KHitCounter(params);
+    }
+    if (bloom_track_fp) {
+        fpCounter = new FPCounter(params);
+    }
+    if (track_access_frequency_hit) {
+        accessFrequencyCounter = new AccessFrequencyCounter(trace_file, n_extra_fields, n_early_stop);
+    }
+    if (track_access_resource_hit) {
+        accessResourceCounter = new AccessResourceCounter(trace_file, n_extra_fields,
+                                                          n_early_stop, access_resource_counter_window,
+                                                          access_resource_counter_reduction_factor);
+    }
+    if (track_access_age_hit) {
+        accessAgeCounter = new AccessAgeCounter(trace_file, n_extra_fields, n_early_stop);
+        accessAgeCounter->init_req_counter(params);
     }
 
     adjust_real_time_offset();
@@ -340,6 +342,9 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
                 }
                 if (bloom_track_fp) {
                     fpCounter->insert(*req);
+                }
+                if (track_access_age_hit) {
+                    accessAgeCounter->incr_req_count(*req);
                 }
             } else {
                 if (track_cache_hit) {
