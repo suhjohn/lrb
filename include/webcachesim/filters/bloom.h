@@ -574,6 +574,29 @@ public:
     }
 };
 
+//class EvictionAgeMeanTracker {
+//
+//public:
+//    unordered_map <uint64_t, uint64_t> seq_map;
+//    uint64_t seq;
+//    EvictionAgeMeanTracker() {}
+//
+//    void on_admit(SimpleRequest &req) {
+//        uint64_t key = req.get_id();
+//        seq_map[key] = req.get_t();
+//        seq++;
+//    }
+//
+//    void incr_seq() {
+//        seq++;
+//    }
+//
+//    void on_evict(uint64_t key) {
+//        auto diff = seq - seq_map[key];
+//        seq_map.erase(key);
+//
+//    }
+//};
 
 class AccessAgeCounter {
 public:
