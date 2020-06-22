@@ -152,7 +152,7 @@ class FreqObjBinsWindow:
             del self.counter[key]
         self.sliding_window.append(key)
         self.counter[key] += 1
-        index = min(self.counter[key] - 1, len(self.freq_bins))
+        index = min(self.counter[key] - 1, len(self.freq_bins) - 1)
         self.freq_bins[index] += size
 
     def result(self):
