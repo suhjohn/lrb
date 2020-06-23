@@ -574,29 +574,68 @@ public:
     }
 };
 
-//class EvictionAgeMeanTracker {
-//
-//public:
-//    unordered_map <uint64_t, uint64_t> seq_map;
-//    uint64_t seq;
-//    EvictionAgeMeanTracker() {}
-//
-//    void on_admit(SimpleRequest &req) {
-//        uint64_t key = req.get_id();
-//        seq_map[key] = req.get_t();
-//        seq++;
-//    }
-//
-//    void incr_seq() {
-//        seq++;
-//    }
-//
-//    void on_evict(uint64_t key) {
-//        auto diff = seq - seq_map[key];
-//        seq_map.erase(key);
-//
-//    }
-//};
+class EvictionAgeMeanTracker {
+
+public:
+    unordered_map <uint64_t, uint64_t> seq_map;
+    vector <float> mean_eviction_age_arr;
+    unordered_map <uint64_t, uint64_t> seq_map;
+
+    int64_t segment_total_eviction_age;
+    int64_t segment_window = 1000000;
+    int64_t segment_eviction_count; // counts # of objects evicted
+    uint64_t seq; // counts # of objects seen
+
+    EvictionAgeMeanTracker() {
+        segment_total_eviction_age = 0;
+        segment_eviction_count = 0;
+        seq = 0;
+    }
+
+    void on_admit(SimpleRequest &req) {
+        uint64_t key = req.get_id();
+        seq_map[key] = req.get_t();
+    }
+
+    void record_to_bucket(){
+        if (segment_eviction_count > 0){
+            mean_eviction_age_arr.push_back(
+                (float) segment_total_eviction_age / segment_eviction_count);
+        } else {
+            mean_eviction_age_arr.push_back(0);
+        };
+        segment_total_eviction_age = 0;
+        segment_eviction_count = 0;
+    };
+
+    void incr_seq() {
+        if (seq && !(seq % segment_window)) {
+            record_to_bucket();
+        }
+        seq++;
+    }
+
+    void on_evict(uint64_t key) {
+        auto diff = seq - seq_map[key];
+        curr_total_eviction_age += diff;
+        segment_eviction_count++;
+        seq_map.erase(key);
+    }
+
+    void update_stat(bsoncxx::v_noabi::builder::basic::document &doc) {
+        record_to_bucket();
+
+        auto arr = bsoncxx::builder::stream::array{};
+        arr << open_array;
+        for (int i = 0; i < mean_eviction_age_arr.size(); i++) {
+            arr << mean_eviction_age_arr[i];
+        }
+        arr << close_array;
+        doc.append(kvp("mean_eviction_age_arr", arr));
+        doc.append(kvp("mean_eviction_age_arr_segment_window", segment_window));
+    }
+
+};
 
 class AccessAgeCounter {
 public:

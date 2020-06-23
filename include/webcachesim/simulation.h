@@ -92,6 +92,9 @@ public:
     bool track_access_resource_hit = false;
     AccessResourceCounter *accessResourceCounter;
 
+    bool track_eviction_age = false;
+    EvictionAgeMeanTracker *evictionAgeMeanTracker;
+
     bool track_access_age_hit = false;
     AccessAgeCounter *accessAgeCounter;
 
