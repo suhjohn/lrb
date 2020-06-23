@@ -93,17 +93,8 @@ class WebcachesimExecutor:
 
     def run(self):
         task_id = self._run_program("git log --pretty=format:'%h' -n 1")
-        self._send_telegram(f"[{task_id}] Setup start")
-
         command = f'git submodule update --init --recursive'
         subprocess.run(command, cwd=WEBCACHESIM_ROOT, shell=True)
-
-        job_file = f"{WEBCACHESIM_ROOT}/{self.config_dir}/execution_settings.yaml"
-        with open(job_file) as f:
-            execution_settings = yaml.load(f, Loader=yaml.FullLoader)
-        nodes = execution_settings["nodes"]
-        # self._setup_nodes(nodes)
-        self._send_telegram(f"[{task_id}] Setup complete")
 
         command = f"nohup {PYTHON} {WEBCACHESIM_ROOT}/pywebcachesim_v2/simulate.py " \
                   f"--dburi {DBURI} " \
@@ -144,7 +135,14 @@ class WebcachesimExecutor:
             time.sleep(20)
         self._send_telegram(f"[{task_id}] complete")
 
+    def setup(self):
+        job_file = f"{WEBCACHESIM_ROOT}/{self.config_dir}/execution_settings.yaml"
+        with open(job_file) as f:
+            execution_settings = yaml.load(f, Loader=yaml.FullLoader)
+        nodes = execution_settings["nodes"]
+        self._setup_nodes(nodes)
+        self._send_telegram(f"Setup complete")
 
 if __name__ == '__main__':
     executor = WebcachesimExecutor("config", DBURI, TELEGRAM_API_KEY, TELEGRAM_CHAT_ID)
-    executor.run()
+    executor.setup()
