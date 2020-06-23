@@ -624,13 +624,10 @@ public:
     void update_stat(bsoncxx::v_noabi::builder::basic::document &doc) {
         record_to_bucket();
 
-        auto arr = bsoncxx::builder::stream::array{};
-        arr << open_array;
-        for (int i = 0; i < mean_eviction_age_arr.size(); i++) {
-            arr << mean_eviction_age_arr[i];
-        }
-        arr << close_array;
-        doc.append(kvp("mean_eviction_age_arr", arr));
+        doc.append(kvp("mean_eviction_age_arr", [this](sub_array child) {
+            for (const auto &element : mean_eviction_age_arr)
+                child.append(element);
+        }));
         doc.append(kvp("mean_eviction_age_arr_segment_window", segment_window));
     }
 
