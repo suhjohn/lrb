@@ -579,7 +579,6 @@ class EvictionAgeMeanTracker {
 public:
     unordered_map <uint64_t, uint64_t> seq_map;
     vector <float> mean_eviction_age_arr;
-    unordered_map <uint64_t, uint64_t> seq_map;
 
     int64_t segment_total_eviction_age;
     int64_t segment_window = 1000000;
@@ -617,7 +616,7 @@ public:
 
     void on_evict(uint64_t key) {
         auto diff = seq - seq_map[key];
-        curr_total_eviction_age += diff;
+        segment_total_eviction_age += diff;
         segment_eviction_count++;
         seq_map.erase(key);
     }
