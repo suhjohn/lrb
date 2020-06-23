@@ -92,7 +92,7 @@ class WebcachesimExecutor:
             json.dump(hostnames, f)
 
     def run(self):
-        task_id = str(uuid.uuid4().hex)
+        task_id = self._run_program("git log --pretty=format:'%h' -n 1")
         self._send_telegram(f"[{task_id}] Start experiment")
         self._send_telegram(f"[{task_id}] Setup start")
 
@@ -106,14 +106,14 @@ class WebcachesimExecutor:
         # self._setup_nodes(nodes)
         self._send_telegram("[task_id] Setup complete")
 
-        command = f"{PYTHON} {WEBCACHESIM_ROOT}/pywebcachesim_v2/simulate.py " \
+        command = f"nohup {PYTHON} {WEBCACHESIM_ROOT}/pywebcachesim_v2/simulate.py " \
                   f"--dburi {DBURI} " \
                   f"--algorithm_param_file {WEBCACHESIM_ROOT}/{self.config_dir}/algorithm_params.yaml " \
                   f"--execution_settings_file {WEBCACHESIM_ROOT}/{self.config_dir}/execution_settings.yaml " \
                   f"--job_file {WEBCACHESIM_ROOT}/{self.config_dir}/job_dev.yaml " \
                   f"--trace_param_file {WEBCACHESIM_ROOT}/{self.config_dir}/trace_params.yaml " \
-                  f"--pywebcachesim_task_id {task_id} & disown"
-        self._send_telegram("[task_id] Start simulation")
+                  f"--pywebcachesim_task_id {task_id} &> /tmo/{task_id}--execution.log & disown"
+        self._send_telegram(f"[{task_id}] Start simulation")
         subprocess.Popen(command, executable="/bin/bash", shell=True)
 
         log_file = f"/tmp/{task_id}--logfile.json"
