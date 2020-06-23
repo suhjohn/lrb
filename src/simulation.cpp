@@ -176,6 +176,7 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
         webcache->addEvictionCallback(f);
     }
     if (track_eviction_age) {
+        evictionAgeMeanTracker = new EvictionAgeMeanTracker();
         auto f = bind(&EvictionAgeMeanTracker::on_evict, evictionAgeMeanTracker, placeholders::_1);
         webcache->addEvictionCallback(f);
     }
