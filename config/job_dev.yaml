@@ -7,9 +7,9 @@ trace_files:
 cache_types:
 #  - LRB
   - LRU
-  - LFUDA
-  - LRUK
+#  - LFUDA
+#  - LRUK
 #  - GDSF
-  - LeCaR
-  - UCB
-  - Hyperbolic
+#  - LeCaR
+#  - UCB
+#  - Hyperbolic
