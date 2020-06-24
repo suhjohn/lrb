@@ -748,7 +748,7 @@ public:
 //        for (bits = 0; var != 0; ++bits) var >>= 1;
         float bucket_base = log2(age);
         int bucket = bucket_base * bucket_detail;
-        int i = min(bucketits, obj_freq_buckets.size() - 1);
+        int i = min(bucket, obj_freq_buckets.size() - 1);
 
         int obj_j = min(obj_count - 1, freq_bucket_count - 1);
         int req_j = min(req_count - 1, freq_bucket_count - 1);
