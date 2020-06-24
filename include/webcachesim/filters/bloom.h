@@ -9,6 +9,7 @@
 #include <fstream>
 #include <algorithm>
 #include <vector>
+#include <cmath>
 
 #include <sstream>
 #include <unordered_set>
@@ -652,13 +653,14 @@ public:
     int freq_bucket_count;
     uint64_t segment_window;
     int seq;
+    int bucket_detail = 4;
 
     AccessAgeCounter(
             const string &trace_file, uint n_extra_fields,
             int64_t n_early_stop = -1, uint64_t _segment_window = 1000000,
             int _bucket_count = 40, int _freq_bucket_count = 3) {
         cerr << "init AccessAgeCounter" << endl;
-        bucket_count = _bucket_count;
+        bucket_count = _bucket_count * bucket_detail; // More fine grained buckets
         freq_bucket_count = _freq_bucket_count;
         segment_window = _segment_window;
 
@@ -742,10 +744,12 @@ public:
         int req_count = filter->count(req);
 
         // get bits of age
-        uint64_t bits, var = (age < 0) ? -age : age;
-        for (bits = 0; var != 0; ++bits) var >>= 1;
+//        uint64_t bits, var = (age < 0) ? -age : age;
+//        for (bits = 0; var != 0; ++bits) var >>= 1;
+        float bucket_base = log2(age);
+        int bucket = bucket_base * bucket_detail;
+        int i = min(bucketits, obj_freq_buckets.size() - 1);
 
-        int i = min(bits, obj_freq_buckets.size() - 1);
         int obj_j = min(obj_count - 1, freq_bucket_count - 1);
         int req_j = min(req_count - 1, freq_bucket_count - 1);
         obj_freq_buckets[i][obj_j] += req.get_size();
