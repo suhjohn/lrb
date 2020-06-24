@@ -1,93 +1,10 @@
+import sys
+import threading
+
 from pymongo import MongoClient
 from collections import defaultdict, Counter, deque
 
 import os
-
-
-class AgeObjectBins:
-    def __init__(self, max_pow):
-        self.bins = [0 for _ in range(max_pow + 1)]
-        self.last_accessed = defaultdict(int)  # key: last access logical time
-        self.max_bin_size = max_pow
-        self.bin_list = []
-
-    def record_stat(self):
-        self.bin_list.append(list(self.bins))
-        for i in range(len(self.bins)):
-            self.bins[i] = 0
-
-    def incr_count(self, curr_index, key):
-        if self.last_accessed[key]:
-            age_index = min((curr_index - self.last_accessed[key]).bit_length(), self.max_bin_size)
-            self.bins[age_index] += 1
-        self.last_accessed[key] = curr_index
-
-    def get_bins(self):
-        return list(self.bin_list)
-
-
-class AgeByteBins:
-    def __init__(self, max_pow):
-        self.bins = [0 for _ in range(max_pow + 1)]
-        self.last_accessed = defaultdict(int)  # key: last access logical time
-        self.max_bin_size = max_pow
-        self.bin_list = []
-
-    def record_stat(self):
-        self.bin_list.append(list(self.bins))
-        for i in range(len(self.bins)):
-            self.bins[i] = 0
-
-    def incr_count(self, curr_index, key, size):
-        if self.last_accessed[key]:
-            age_index = min((curr_index - self.last_accessed[key]).bit_length(), self.max_bin_size)
-            self.bins[age_index] += size
-        self.last_accessed[key] = curr_index
-
-    def get_bins(self):
-        return list(self.bin_list)
-
-
-class FreqObjectBins:
-    def __init__(self, max_pow):
-        self.freq_counter = defaultdict(int)
-        self.bins = [0 for _ in range(max_pow + 1)]
-        self.max_bin_size = max_pow
-        self.bin_list = []
-
-    def record_stat(self):
-        self.bin_list.append(list(self.bins))
-        for i in range(len(self.bins)):
-            self.bins[i] = 0
-
-    def incr_count(self, curr_index, key):
-        self.freq_counter[key] += 1
-        freq_index = min(self.freq_counter[key].bit_length(), self.max_bin_size)
-        self.bins[freq_index] += 1
-
-    def get_bins(self):
-        return list(self.bin_list)
-
-
-class FreqByteBins:
-    def __init__(self, max_pow):
-        self.freq_counter = defaultdict(int)
-        self.bins = [0 for _ in range(max_pow + 1)]
-        self.max_bin_size = max_pow
-        self.bin_list = []
-
-    def record_stat(self):
-        self.bin_list.append(list(self.bins))
-        for i in range(len(self.bins)):
-            self.bins[i] = 0
-
-    def incr_count(self, curr_index, key, size):
-        self.freq_counter[key] += 1
-        freq_index = min(self.freq_counter[key].bit_length(), self.max_bin_size)
-        self.bins[freq_index] += size
-
-    def get_bins(self):
-        return list(self.bin_list)
 
 
 class TraceIterator:
@@ -139,54 +56,112 @@ class TraceIterator:
         return timestamp, key, size
 
 
-class FreqObjBinsWindow:
-    def __init__(self, window_size):
+class FreqBinnedWindowReqCount:
+    def __init__(self, window_size, n_warmup):
         self.sliding_window = deque()
         self.counter = Counter()
         self.freq_bins = [0, 0, 0]
         self.window_size = window_size
+        self.n_warmup = n_warmup
 
     def incr_count(self, index, key, size):
         if len(self.sliding_window) > self.window_size:
             key = self.sliding_window.popleft()
-            del self.counter[key]
+            self.counter[key] -= 1
         self.sliding_window.append(key)
         self.counter[key] += 1
         index = min(self.counter[key] - 1, len(self.freq_bins) - 1)
-        self.freq_bins[index] += size
+
+        if index > self.n_warmup:
+            self.freq_bins[index] += size
 
     def result(self):
         return {
+            "type": "BinnedwindowReqCount",
             "window_size": self.window_size,
             "freq_bins": self.freq_bins
         }
 
 
-class TraceStatistics:
-    def __init__(self):
-        self.large_window = FreqObjBinsWindow(40000000)
-        self.medium_window = FreqObjBinsWindow(1000000)
-        self.small_window = FreqObjBinsWindow(100)
+class FreqBinnedWindowObjCount:
+    def __init__(self, window_size, n_warmup):
+        self.freq_count_bins = [0, 0, 0]
+        self.freq_byte_bins = [0, 0, 0]
+        self.window_size = window_size
+        self.window = deque()
+        self.key_size_map = dict()
+        self.n_warmup = n_warmup
 
-    def update(self, index, timestamp, key, size):
-        self.large_window.incr_count(index, key, size)
-        self.medium_window.incr_count(index, key, size)
-        self.small_window.incr_count(index, key, size)
+    def dump_result(self):
+        counter = Counter(self.window)
+        for k, v in counter.items():
+            i = min(v - 1, len(self.freq_count_bins) - 1)
+            self.freq_count_bins[i] += v
+            self.freq_byte_bins[i] += self.key_size_map[k]
 
-    def get_result(self):
+    def incr_count(self, index, key, size):
+        if len(self.window) == self.window_size:
+            if index > self.n_warmup:
+                self.dump_result()
+            self.window = deque()
+            self.key_size_map = dict()
+
+        self.window.append(key)
+        self.key_size_map[key] = size
+
+    def result(self):
         return {
-            "large_window": self.large_window.result(),
-            "medium_window": self.medium_window.result(),
-            "small_window": self.small_window.result(),
+            "type": "BinnedWindowObjCount",
+            "window_size": self.window_size,
+            "freq_count_bins": self.freq_count_bins,
+            "freq_byte_bins": self.freq_byte_bins
         }
 
 
+class TraceStatistics:
+    def __init__(self, n_warmup=-1):
+        window_sizes = [100, 1000, 10000, 100000, 1000000, 10000000, 100000000]
+        self.req_counters = []
+        self.obj_counters = []
+        for window_size in window_sizes:
+            self.req_counters.append(FreqBinnedWindowReqCount(window_size, n_warmup))
+            self.obj_counters.append(FreqBinnedWindowObjCount(window_size, n_warmup))
+
+    def update(self, index, timestamp, key, size):
+        for counter in self.req_counters:
+            counter.incr_count(index, key, size)
+        for counter in self.obj_counters:
+            counter.incr_count(index, key, size)
+
+    def get_result(self):
+        for counter in self.obj_counters:
+            counter.dump_result()
+
+        return {
+            "request_count_data": [counter.result() for counter in self.req_counters],
+            "obj_count_data": [counter.result() for counter in self.obj_counters],
+        }
+
+
+WARMUP_MAP = {
+    'wiki2018.tr': 2400 * 10 ** 6,
+    'wiki2019.tr': 2200 * 10 ** 6,
+    'traceUS_ts.tr': 200 * 10 ** 6,
+    'traceHK_ts.tr': 200 * 10 ** 6,
+    'ntg1_base.tr': 1000e6,
+    'ntg2_base.tr': 1000e6,
+    'ntg3_base.tr': 1000e6,
+}
+
+
 def analyze(trace_filepath):
-    trace_statistics = TraceStatistics()
     trace_iterator = TraceIterator(trace_filepath)
+    trace_filename = trace_filepath.split("/")[-1]
+    n_warmup = WARMUP_MAP[trace_filename]
+    trace_statistics = TraceStatistics(n_warmup)
     for trace in trace_iterator:
         index, timestamp, key, size = trace
-        if index != 0 and index % 100000 == 0:
+        if index != 0 and index % 1000000 == 0:
             print(f"[analyze] {index}")
         trace_statistics.update(index, timestamp, key, size)
     result = trace_statistics.get_result()
