@@ -209,7 +209,7 @@ wiki2019.tr:
   segment_window: 10000000
   real_time_segment_window: 6000
   enable_trace_format_check: 0
-  max_n_element:
+#  max_n_element:
 #    - 1
 #    - 2
 #    - 4
@@ -262,26 +262,26 @@ wiki2019.tr:
 #    - 1162261467
 #    - 10
 #    - 100
-    - 1000
+#    - 1000
 #    - 10000
 #    - 100000
-    - 1000000
+#    - 1000000
 #    - 10000000
 #    - 100000000
-    - 40000000
-  bloom_k:
+#    - 40000000
+#  bloom_k:
 #    - 1
-    - 2
+#    - 2
 #    - 4
 #    - 8
 #    - 16
 #    - 32
 #  bloom_track_k_hit: 1
 #  bloom_track_fp: 1
-  version:
-    - 2
-  filter_type:
-    - Set
+#  version:
+#    - 2
+#  filter_type:
+#    - Set
 #    - Bloom
 #  access_resource_counter_window: 100000
 #  access_resource_counter_reduction_factor: 100000
