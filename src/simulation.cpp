@@ -401,7 +401,7 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
         if (track_eviction_age) {
             evictionAgeMeanTracker->incr_seq();
         }
-        if (track_no_hiteviction_age) {
+        if (track_no_hit_eviction_age) {
             evictionAgeNoHitMeanTracker->incr_seq();
         }
     }
