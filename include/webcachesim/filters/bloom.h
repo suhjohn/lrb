@@ -579,7 +579,7 @@ class EvictionAgeMeanTracker {
 
 public:
     unordered_map <uint64_t, uint64_t> seq_map;
-    vector <float> mean_eviction_age_arr;
+    vector<float> mean_eviction_age_arr;
 
     int64_t segment_total_eviction_age;
     int64_t segment_window = 1000000;
@@ -597,10 +597,10 @@ public:
         seq_map[key] = req.get_t();
     }
 
-    void record_to_bucket(){
-        if (segment_eviction_count > 0){
+    void record_to_bucket() {
+        if (segment_eviction_count > 0) {
             mean_eviction_age_arr.push_back(
-                (float) segment_total_eviction_age / segment_eviction_count);
+                    (float) segment_total_eviction_age / segment_eviction_count);
         } else {
             mean_eviction_age_arr.push_back(0);
         };
@@ -638,7 +638,7 @@ class EvictionAgeNoHitMeanTracker {
 
 public:
     unordered_map <uint64_t, uint64_t> seq_map;
-    vector <float> mean_eviction_age_arr;
+    vector<float> mean_eviction_age_arr;
     unordered_set <uint64_t> hit_map;
     int64_t segment_total_eviction_age;
     int64_t segment_window = 1000000;
@@ -661,8 +661,8 @@ public:
         hit_map.insert(key);
     }
 
-    void record_to_bucket(){
-        if (segment_eviction_count > 0){
+    void record_to_bucket() {
+        if (segment_eviction_count > 0) {
             mean_eviction_age_arr.push_back(
                     (float) segment_total_eviction_age / segment_eviction_count);
         } else {
@@ -681,7 +681,7 @@ public:
 
     void on_evict(uint64_t key) {
         auto diff = seq - seq_map[key];
-        if (hit_map.find(key) == hit_map.end()){
+        if (hit_map.find(key) == hit_map.end()) {
             segment_total_eviction_age += diff;
             segment_eviction_count++;
         }
@@ -700,7 +700,6 @@ public:
     }
 
 };
-
 
 
 class AccessAgeCounter {
@@ -860,5 +859,54 @@ public:
         doc.append(kvp("access_age_buckets_req_freq_bytes", bytes_classified_by_req_freq));
     }
 };
+
+
+class AdmitTracker {
+    int64_t admit_count;
+    int64_t admit_bytes;
+    vector <int64_t> admit_count_arr;
+    vector <int64_t> admit_bytes_arr;
+    int seq = 0;
+    uint64_t segment_window;
+
+    AdmitTracker(uint64_t _segment_window = 1000000) {
+        admit_count = 0;
+        admit_bytes = 0;
+        segment_window = _segment_window;
+    }
+
+    void record_data() {
+        admit_count_arr.push_back(admit_count);
+        admit_bytes_arr.push_back(admit_bytes);
+        admit_count = 0;
+        admit_bytes = 0;
+    }
+
+    void on_admit(SimpleRequest &req) {
+        if (seq && !(seq % segment_window)) {
+            record_data();
+        }
+        admit_count += 1;
+        admit_bytes += req.get_size();
+    }
+
+    void incr_seq() {
+        seq++;
+    }
+
+    void update_stat(bsoncxx::v_noabi::builder::basic::document &doc) {
+        record_data();
+        doc.append(kvp("admit_tracker_segment_window", segment_window));
+        doc.append(kvp("admit_count_arr", [this](sub_array child) {
+            for (const auto &element : admit_count_arr)
+                child.append(element);
+        }));
+        doc.append(kvp("admit_bytes_arr", [this](sub_array child) {
+            for (const auto &element : admit_bytes_arr)
+                child.append(element);
+        }));
+    }
+};
+
 
 #endif //LRB_BLOOM_H

@@ -74,33 +74,37 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
             int _val = stoi(it->second);
             track_cache_hit = _val != 0;
             ++it;
-        } else if(it->first == "track_access_frequency_hit") {
+        } else if (it->first == "track_access_frequency_hit") {
             int _val = stoi(it->second);
             track_access_frequency_hit = _val != 0;
             ++it;
-        } else if(it->first == "track_access_resource_hit") {
+        } else if (it->first == "track_access_resource_hit") {
             int _val = stoi(it->second);
             track_access_resource_hit = _val != 0;
             ++it;
-        } else if(it->first == "access_resource_counter_window") {
+        } else if (it->first == "access_resource_counter_window") {
             access_resource_counter_window = stoull(it->second);
             ++it;
-        } else if (it->first == "access_resource_counter_reduction_factor"){
+        } else if (it->first == "access_resource_counter_reduction_factor") {
             access_resource_counter_reduction_factor = stoi(it->second);
             ++it;
-        } else if(it->first == "track_access_age_hit") {
+        } else if (it->first == "track_access_age_hit") {
             int _val = stoi(it->second);
             track_access_age_hit = _val != 0;
             ++it;
-        } else if(it->first == "track_eviction_age"){
+        } else if (it->first == "track_eviction_age") {
             int _val = stoi(it->second);
             track_eviction_age = _val != 0;
             ++it;
-        } else if(it->first == "track_no_hit_eviction_age"){
+        } else if (it->first == "track_no_hit_eviction_age") {
             int _val = stoi(it->second);
             track_no_hit_eviction_age = _val != 0;
             ++it;
-        }else {
+        } else if (it->first == "track_admission") {
+            int _val = stoi(it->second);
+            track_admission = _val != 0;
+            ++it;
+        } else {
             ++it;
         }
     }
@@ -184,7 +188,7 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
         auto f = bind(&EvictionAgeMeanTracker::on_evict, evictionAgeMeanTracker, placeholders::_1);
         webcache->addEvictionCallback(f);
     }
-    if (track_no_hit_eviction_age){
+    if (track_no_hit_eviction_age) {
         evictionAgeNoHitMeanTracker = new EvictionAgeNoHitMeanTracker();
         auto f = bind(&EvictionAgeNoHitMeanTracker::on_evict, evictionAgeNoHitMeanTracker, placeholders::_1);
         webcache->addEvictionCallback(f);
@@ -209,6 +213,9 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
     if (track_access_age_hit) {
         accessAgeCounter = new AccessAgeCounter(trace_file, n_extra_fields, n_early_stop);
         accessAgeCounter->init_req_counter(params);
+    }
+    if (track_admission) {
+        admitTracker = new AdmitTracker();
     }
 
     adjust_real_time_offset();
@@ -259,11 +266,11 @@ void FrameWork::update_stats() {
     auto metadata_overhead = get_rss();
     seg_rss.emplace_back(metadata_overhead);
     if (is_metadata_in_cache_size) {
-        if (_cache_size - metadata_overhead + filter_bytes_used  > _cache_size) {
+        if (_cache_size - metadata_overhead + filter_bytes_used > _cache_size) {
             cerr << "cache size overflow from metadata." << endl;
             exit(-1);
         }
-        webcache->setSize(_cache_size - metadata_overhead + filter_bytes_used );
+        webcache->setSize(_cache_size - metadata_overhead + filter_bytes_used);
     }
     cerr << "rss: " << metadata_overhead << endl;
     webcache->update_stat_periodic();
@@ -350,6 +357,7 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
                     should_filter = filter->should_filter(*req);
                 }
                 if (!should_filter) {
+                    // insertion
                     webcache->admit(*req);
                     if (track_eviction_age) {
                         evictionAgeMeanTracker->on_admit(*req);
@@ -360,7 +368,11 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
                     if (track_access_resource_hit) {
                         accessResourceCounter->on_admit(*req);
                     }
+                    if (track_admission) {
+                        admitTracker->on_admit(*req);
+                    }
                 }
+                // filter
                 if (bloom_track_k_hit) {
                     kHitCounter->insert(*req);
                 }
@@ -371,6 +383,7 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
                     accessAgeCounter->incr_req_count(*req);
                 }
             } else {
+                // hit
                 if (track_cache_hit) {
                     cache_hit_ofstream << seq << " " << id << " " << size << endl;
                 }
@@ -403,6 +416,9 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
         }
         if (track_no_hit_eviction_age) {
             evictionAgeNoHitMeanTracker->incr_seq();
+        }
+        if (track_admission) {
+            admitTracker->incr_seq();
         }
     }
     delete req;
@@ -485,10 +501,10 @@ bsoncxx::builder::basic::document FrameWork::simulation_results() {
     if (track_access_frequency_hit) {
         accessFrequencyCounter->update_stat(value_builder);
     }
-    if (track_access_resource_hit){
+    if (track_access_resource_hit) {
         accessResourceCounter->update_stat(value_builder);
     }
-    if (track_access_age_hit){
+    if (track_access_age_hit) {
         accessAgeCounter->update_stat(value_builder);
     }
     if (track_eviction_age) {
@@ -496,6 +512,9 @@ bsoncxx::builder::basic::document FrameWork::simulation_results() {
     }
     if (track_no_hit_eviction_age) {
         evictionAgeNoHitMeanTracker->update_stat(value_builder);
+    }
+    if (track_admission) {
+        admitTracker->update_stat(value_builder);
     }
     webcache->update_stat(value_builder);
     return value_builder;
