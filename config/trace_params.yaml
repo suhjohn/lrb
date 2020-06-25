@@ -282,8 +282,8 @@ wiki2019.tr:
 #  bloom_track_fp: 1
 #  version:
 #    - 2
-#  filter_type:
-#    - Set
+  filter_type:
+    - Set
 #    - Bloom
 #  access_resource_counter_window: 100000
 #  access_resource_counter_reduction_factor: 100000
