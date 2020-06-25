@@ -194,12 +194,12 @@ wiki2019.tr:
 #            - 335544320
 #          byte_million_req:
 #            - 35234263115
-    - 1099511627776:
-        LRU:
-          max_n_element:
-            - 40000000
-            - 1000000
-            - 1000
+#    - 1099511627776:
+#        LRU:
+#          max_n_element:
+#            - 40000000
+#            - 1000000
+#            - 1000
 #        LRB:
 #          memory_window:
 #            - 671088640
@@ -282,14 +282,14 @@ wiki2019.tr:
 #  bloom_track_fp: 1
 #  version:
 #    - 2
-  filter_type:
-    - Set
+#  filter_type:
+#    - Set
 #    - Bloom
 #  access_resource_counter_window: 100000
 #  access_resource_counter_reduction_factor: 100000
 #  track_access_frequency_hit: 1
 #  track_access_resource_hit: 1
-  track_access_age_hit: 1
+#  track_access_age_hit: 1
 #  track_eviction_age: 1
-#  track_no_hit_eviction_age: 1
+  track_no_hit_eviction_age: 1
 #  bloom_record_reset: 1
