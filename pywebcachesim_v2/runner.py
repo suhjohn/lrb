@@ -66,10 +66,15 @@ def run(pywebcachesim_task_id, raw_tasks, execution_settings):
         json.dump(res, f)
     while completed_task_count < total_task_count:
         # determine what tasks were completed and are still running
-        pool = ThreadPool(5)
-        nodes_webcachesim_task_ids = pool.map(get_running_tasks, nodes)
-        pool.close()
-        pool.join()
+        try:
+            pool = ThreadPool(5)
+            nodes_webcachesim_task_ids = pool.map(get_running_tasks, nodes)
+            pool.close()
+            pool.join()
+        except:
+            print("Failed to get running tasks from all nodes. Sleeping 20")
+            time.sleep(30)
+            continue
         # we only care about task_ids assigned for this runner call. There may exist other task_ids invoked by
         #   another webcachesim calls; we simply ignore them.
         queried_task_ids = {
@@ -115,7 +120,7 @@ def run(pywebcachesim_task_id, raw_tasks, execution_settings):
                 task_id, task_str = tasks.pop()
                 new_tasks.append((node, task_str))
                 running_task_ids[node].append(task_id)
-                print(node, task_id)
+                print(node, task_str, task_id)
 
             # execute new tasks
             print(f"running {len(new_tasks)}")
