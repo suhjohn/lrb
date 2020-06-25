@@ -198,6 +198,7 @@ wiki2019.tr:
 #          max_n_element:
 #            - 40000000
 #            - 1000000
+#            - 1000
 #        LRB:
 #          memory_window:
 #            - 671088640
