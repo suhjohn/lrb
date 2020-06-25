@@ -143,6 +143,46 @@ class WebcachesimExecutor:
         self._setup_nodes(nodes)
         self._send_telegram(f"Setup complete")
 
+
+    def _build_nodes(self, nodes):
+        hostnames = []
+        for node in nodes:
+            node_ssh_cmd = node.split("/")[-1]
+            node_name = node_ssh_cmd.split(" ")[-1]
+            hostnames.append(node_name)
+
+        try:
+            with open(f'/tmp/temp_hostnames.json', 'r') as f:
+                prev_hostnames = json.load(f)
+            # diff_host_names = list(set(hostnames) - set(prev_hostnames))
+            diff_host_names = list(set(hostnames))
+        except FileNotFoundError:  # case when invoked for the first time on the NFS node
+            diff_host_names = list(set(hostnames))  # removing duplcates in case
+
+        def _build(hostname):
+            command = f"ssh -o StrictHostKeyChecking=no {hostname} 'cd {WEBCACHESIM_ROOT}; ./build.sh'"
+            p = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+            return p.stdout.decode()
+
+        self._send_telegram(f"[build_nodes] start")
+        pool = ThreadPool(5)
+        messages = pool.map(_build, diff_host_names)
+        pool.close()
+        pool.join()
+
+        self._send_telegram(f"[build_nodes] complete")
+        with open(f'/tmp/temp_hostnames.json', 'w') as f:
+            json.dump(hostnames, f)
+
+    def build(self):
+        job_file = f"{WEBCACHESIM_ROOT}/{self.config_dir}/job_dev.yaml"
+        with open(job_file) as f:
+            execution_settings = yaml.load(f, Loader=yaml.FullLoader)
+        nodes = execution_settings["nodes"]
+        self._build_nodes(nodes)
+
+
 if __name__ == '__main__':
     executor = WebcachesimExecutor("config", DBURI, TELEGRAM_API_KEY, TELEGRAM_CHAT_ID)
+    executor.build()
     executor.run()
