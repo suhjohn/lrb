@@ -97,7 +97,7 @@ public:
     std::vector<bf::basic_bloom_filter *> filters;
 };
 
-static FilterFactory <BloomFilter> factoryBloomFilter("InsertingBloom");
+static FilterFactory <InsertingBloomFilter> factoryInsertingBloomFilter("InsertingBloom");
 
 class BloomFilter : public Filter {
 public:
@@ -928,6 +928,7 @@ public:
 
 
 class AdmitTracker {
+public:
     int64_t admit_count;
     int64_t admit_bytes;
     vector <int64_t> admit_count_arr;
