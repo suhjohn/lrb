@@ -289,7 +289,7 @@ wiki2019.tr:
 #  access_resource_counter_reduction_factor: 100000
 #  track_access_frequency_hit: 1
 #  track_access_resource_hit: 1
-#  track_access_age_hit: 1
-  track_eviction_age: 1
+  track_access_age_hit: 1
+#  track_eviction_age: 1
 #  track_no_hit_eviction_age: 1
 #  bloom_record_reset: 1
