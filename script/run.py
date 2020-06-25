@@ -175,7 +175,7 @@ class WebcachesimExecutor:
             json.dump(hostnames, f)
 
     def build(self):
-        job_file = f"{WEBCACHESIM_ROOT}/{self.config_dir}/job_dev.yaml"
+        job_file = f"{WEBCACHESIM_ROOT}/{self.config_dir}/execution_settings.yaml"
         with open(job_file) as f:
             execution_settings = yaml.load(f, Loader=yaml.FullLoader)
         nodes = execution_settings["nodes"]
