@@ -96,7 +96,11 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
             int _val = stoi(it->second);
             track_eviction_age = _val != 0;
             ++it;
-        } else {
+        } else if(it->first == "track_no_hit_eviction_age"){
+            int _val = stoi(it->second);
+            track_no_hit_eviction_age = _val != 0;
+            ++it;
+        }else {
             ++it;
         }
     }
@@ -178,6 +182,11 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
     if (track_eviction_age) {
         evictionAgeMeanTracker = new EvictionAgeMeanTracker();
         auto f = bind(&EvictionAgeMeanTracker::on_evict, evictionAgeMeanTracker, placeholders::_1);
+        webcache->addEvictionCallback(f);
+    }
+    if (track_no_hit_eviction_age){
+        evictionAgeNoHitMeanTracker = new EvictionAgeNoHitMeanTracker();
+        auto f = bind(&EvictionAgeNoHitMeanTracker::on_evict, evictionAgeNoHitMeanTracker, placeholders::_1);
         webcache->addEvictionCallback(f);
     }
     if (params.count("version")) {
@@ -345,6 +354,9 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
                     if (track_eviction_age) {
                         evictionAgeMeanTracker->on_admit(*req);
                     }
+                    if (track_no_hit_eviction_age) {
+                        evictionAgeNoHitMeanTracker->on_admit(*req);
+                    }
                     if (track_access_resource_hit) {
                         accessResourceCounter->on_admit(*req);
                     }
@@ -368,6 +380,9 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
                 if (track_access_age_hit) {
                     accessAgeCounter->insert(*req);
                 }
+                if (track_no_hit_eviction_age) {
+                    evictionAgeNoHitMeanTracker->on_hit(*req);
+                }
             }
         } else {
             abort();
@@ -385,6 +400,9 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
         }
         if (track_eviction_age) {
             evictionAgeMeanTracker->incr_seq();
+        }
+        if (track_no_hiteviction_age) {
+            evictionAgeNoHitMeanTracker->incr_seq();
         }
     }
     delete req;
@@ -475,6 +493,9 @@ bsoncxx::builder::basic::document FrameWork::simulation_results() {
     }
     if (track_eviction_age) {
         evictionAgeMeanTracker->update_stat(value_builder);
+    }
+    if (track_no_hit_eviction_age) {
+        evictionAgeNoHitMeanTracker->update_stat(value_builder);
     }
     webcache->update_stat(value_builder);
     return value_builder;

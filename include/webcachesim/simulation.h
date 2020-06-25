@@ -95,6 +95,9 @@ public:
     bool track_eviction_age = false;
     EvictionAgeMeanTracker *evictionAgeMeanTracker;
 
+    bool track_no_hit_eviction_age = false;
+    EvictionAgeNoHitMeanTracker * evictionAgeNoHitMeanTracker;
+
     bool track_access_age_hit = false;
     AccessAgeCounter *accessAgeCounter;
 
