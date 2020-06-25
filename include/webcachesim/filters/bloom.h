@@ -722,7 +722,7 @@ public:
     int freq_bucket_count;
     uint64_t segment_window;
     int seq;
-    int bucket_detail = 1;
+    int bucket_detail = 4;
 
     AccessAgeCounter(
             const string &trace_file, uint n_extra_fields,
