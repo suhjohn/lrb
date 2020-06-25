@@ -76,6 +76,9 @@ public:
     //decompose miss
     int64_t byte_miss_cache = 0;
     int64_t byte_miss_filter = 0;
+    // When does the cache get filled?
+    int64_t cache_filled_seq = -1;
+
     // Parameter for counting k-th hit objects that are not in cache
     bool bloom_track_k_hit = false;
     KHitCounter *kHitCounter;

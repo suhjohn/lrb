@@ -317,7 +317,6 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
         if (seq && !(seq % segment_window)) {
             update_stats();
         }
-
         update_metric_req(byte_req, obj_req, size);
         update_metric_req(rt_byte_req, rt_obj_req, size)
 
@@ -359,6 +358,9 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
                 if (!should_filter) {
                     // insertion
                     webcache->admit(*req);
+                    if (cache_filled_seq == -1 && webcache->_currentSize + size > webcache->_cacheSize) {
+                        cache_filled_seq = seq;
+                    }
                     if (track_eviction_age) {
                         evictionAgeMeanTracker->on_admit(*req);
                     }
@@ -397,6 +399,19 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
                     evictionAgeNoHitMeanTracker->on_hit(*req);
                 }
             }
+        } else if (version == 3){ // COSH + cache checking
+            bool should_filter = false;
+            if (filter != nullptr) {
+                should_filter = filter->should_filter(*req);
+            }
+            if (!webcache->lookup(*req)) {
+                update_metric_req(byte_miss, obj_miss, size);
+                update_metric_req(rt_byte_miss, rt_obj_miss, size);
+                if (!should_filter){
+                    webcache->admit(*req);
+                }
+            }
+
         } else {
             abort();
         }
