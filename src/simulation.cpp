@@ -357,10 +357,10 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
                 }
                 if (!should_filter) {
                     // insertion
-                    webcache->admit(*req);
                     if (cache_filled_seq == -1 && webcache->_currentSize + size > webcache->_cacheSize) {
                         cache_filled_seq = seq;
                     }
+                    webcache->admit(*req);
                     if (track_eviction_age) {
                         evictionAgeMeanTracker->on_admit(*req);
                     }
