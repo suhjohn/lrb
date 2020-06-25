@@ -454,6 +454,7 @@ bsoncxx::builder::basic::document FrameWork::simulation_results() {
                              accumulate<vector<int64_t>::const_iterator, double>(seg_byte_req.begin(),
                                                                                  seg_byte_req.end(), 0)
     ));
+    value_builder.append(kvp("cache_filled_seq", cache_filled_seq));
     value_builder.append(kvp("byte_miss_cache", byte_miss_cache));
     value_builder.append(kvp("byte_miss_filter", byte_miss_filter));
     value_builder.append(kvp("segment_byte_miss", [this](sub_array child) {
