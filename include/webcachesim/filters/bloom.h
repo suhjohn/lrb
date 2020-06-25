@@ -867,9 +867,9 @@ class AdmitTracker {
     vector <int64_t> admit_count_arr;
     vector <int64_t> admit_bytes_arr;
     int seq = 0;
-    uint64_t segment_window;
+    int64_t segment_window;
 
-    AdmitTracker(uint64_t _segment_window = 1000000) {
+    AdmitTracker(int64_t _segment_window = 1000000) {
         admit_count = 0;
         admit_bytes = 0;
         segment_window = _segment_window;
