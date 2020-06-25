@@ -657,8 +657,8 @@ public:
 
     AccessAgeCounter(
             const string &trace_file, uint n_extra_fields,
-            int64_t n_early_stop = -1, uint64_t _segment_window = 1000000,
-            int _bucket_count = 40, int _freq_bucket_count = 3) {
+            int64_t n_early_stop = -1, uint64_t _segment_window = 2000000,
+            int _bucket_count = 35, int _freq_bucket_count = 3) {
         cerr << "init AccessAgeCounter" << endl;
         bucket_count = _bucket_count * bucket_detail; // More fine grained buckets
         freq_bucket_count = _freq_bucket_count;
