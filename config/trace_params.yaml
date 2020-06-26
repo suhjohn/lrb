@@ -37,22 +37,22 @@ wiki2018.tr:
 #            - 167772160
 #          byte_million_req:
 #            - 35234263115
-#    - 549755813888:
-#        LRU:
-#          max_n_element:
+    - 549755813888:
+        LRU:
+          max_n_element:
 #            - 40000000
-#            - 262144
+            - 262144
 #            - 1000
 #        LRB:
 #          memory_window:
 #            - 335544320
 #          byte_million_req:
 #            - 35234263115
-#    - 1099511627776:
-#        LRU:
-#          max_n_element:
-#            - 40000000
-#            - 1000000
+    - 1099511627776:
+        LRU:
+          max_n_element:
+            - 40000000
+            - 1000000
 #        LRB:
 #          memory_window:
 #            - 671088640
@@ -132,20 +132,20 @@ wiki2018.tr:
 #    - 32
 #  bloom_track_k_hit: 1
 #  bloom_track_fp: 1
-#  version:
-#    - 2
-#  filter_type:
+  version:
+    - 2
+  filter_type:
 #    - Set
-#    - Bloom
+    - Bloom
 #  access_resource_counter_window: 100000
 #  access_resource_counter_reduction_factor: 100000
 #  track_access_frequency_hit: 1
 #  track_access_resource_hit: 1
 #  track_access_age_hit: 1
-  track_eviction_age: 1
+#  track_eviction_age: 1
 #  bloom_record_reset: 1
 #  track_no_hit_eviction_age: 1
-#  track_admission: 1
+  track_admission: 1
 
 wiki2019.tr:
   is_metadata_in_cache_size: 0
@@ -198,10 +198,10 @@ wiki2019.tr:
     - 1099511627776:
         LRU:
           max_n_element:
-            - 50510000
-            - 40000000
+#            - 50510000
+#            - 40000000
             - 1000000
-            - 1000
+#            - 1000
 #        LRB:
 #          memory_window:
 #            - 671088640
@@ -273,9 +273,9 @@ wiki2019.tr:
 ##    - 10000000
 #    - 100000000
 #    - 40000000
-#  bloom_k:
+  bloom_k:
 #    - 1
-#    - 2
+    - 2
 #    - 4
 #    - 8
 #    - 16
@@ -285,14 +285,14 @@ wiki2019.tr:
   version:
     - 2
   filter_type:
-    - Set
+    - Bloom
 #    - InsertingBloom
 #  access_resource_counter_window: 100000
 #  access_resource_counter_reduction_factor: 100000
 #  track_access_frequency_hit: 1
 #  track_access_resource_hit: 1
 #  track_access_age_hit: 1
-  track_eviction_age: 1
+#  track_eviction_age: 1
 #  track_no_hit_eviction_age: 1
 #  bloom_record_reset: 1
-#  track_admission: 1
+  track_admission: 1
