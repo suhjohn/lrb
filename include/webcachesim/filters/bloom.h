@@ -951,14 +951,14 @@ public:
     }
 
     void on_admit(SimpleRequest &req) {
-        if (seq && !(seq % segment_window)) {
-            record_data();
-        }
         admit_count += 1;
         admit_bytes += req.get_size();
     }
 
     void incr_seq() {
+        if (seq && !(seq % segment_window)) {
+            record_data();
+        }
         seq++;
     }
 
