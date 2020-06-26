@@ -785,13 +785,13 @@ public:
 
     int bucket_count;
     int freq_bucket_count;
-    uint64_t segment_window;
+    int64_t segment_window;
     int seq;
-    int bucket_detail = 4;
+    int bucket_detail = 3;
 
     AccessAgeCounter(
             const string &trace_file, uint n_extra_fields,
-            int64_t n_early_stop = -1, uint64_t _segment_window = 1000000,
+            int64_t n_early_stop = -1, int64_t _segment_window = 10000000,
             int _bucket_count = 35, int _freq_bucket_count = 3) {
         cerr << "init AccessAgeCounter" << endl;
         bucket_count = _bucket_count * bucket_detail; // More fine grained buckets
@@ -920,7 +920,8 @@ public:
             }
             bytes_classified_by_req_freq << close_array;
         }
-
+        doc.append(kvp("access_age_counter_bucket_detail", bucket_detail));
+        doc.append(kvp("access_age_counter_segment_window", segment_window));
         doc.append(kvp("access_age_buckets_obj_freq_bytes", bytes_classified_by_obj_freq));
         doc.append(kvp("access_age_buckets_req_freq_bytes", bytes_classified_by_req_freq));
     }
