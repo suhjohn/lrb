@@ -282,8 +282,8 @@ wiki2019.tr:
 #    - 32
 #  bloom_track_k_hit: 1
 #  bloom_track_fp: 1
-  version:
-    - 2
+#  version:
+#    - 2
 #  filter_type:
 #    - Bloom
 #    - InsertingBloom
