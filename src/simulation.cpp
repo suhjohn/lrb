@@ -408,6 +408,9 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
                 update_metric_req(byte_miss, obj_miss, size);
                 update_metric_req(rt_byte_miss, rt_obj_miss, size);
                 if (!should_filter){
+                    if (cache_filled_seq == -1 && webcache->_currentSize + size > webcache->_cacheSize) {
+                        cache_filled_seq = seq;
+                    }
                     webcache->admit(*req);
                 }
             }
