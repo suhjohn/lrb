@@ -287,7 +287,7 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
     if (is_offline)
         req = new AnnotatedRequest(0, 0, 0, 0);
     else
-        req = new SimpleRequest(0, 0, 0);
+        req = new SimpleRequest(0, 0, 0, 0);
     t_now = system_clock::now();
 
     int64_t seq_start_counter = 0;
@@ -323,7 +323,7 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
         if (is_offline)
             dynamic_cast<AnnotatedRequest *>(req)->reinit(id, size, seq, next_seq, &extra_features);
         else
-            req->reinit(id, size, seq, &extra_features);
+            req->reinit(id, size, seq, t, &extra_features);
 
         // Different admission strategy depending on version
         if (version == 1) {
