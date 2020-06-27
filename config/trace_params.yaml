@@ -137,8 +137,8 @@ wiki2018.tr:
     #    - Set
     - IntervalBloom
   refresh_interval:
-    - 21600
-    - 86400
+#    - 21600
+    - 172800
 #  access_resource_counter_window: 100000
 #  access_resource_counter_reduction_factor: 100000
 #  track_access_frequency_hit: 1
@@ -290,8 +290,7 @@ wiki2019.tr:
 #    - Set
     - IntervalBloom
   refresh_interval:
-    - 21600
-    - 86400
+    - 172800
 #  access_resource_counter_window: 100000
 #  access_resource_counter_reduction_factor: 100000
 #  track_access_frequency_hit: 1
