@@ -165,6 +165,79 @@ public:
 static FilterFactory <BloomFilter> factoryBloomFilter("Bloom");
 
 
+
+class IntervalBloomFilter : public Filter {
+public:
+    IntervalBloomFilter() : Filter() {}
+
+    void init_with_params(const std::map <std::string, std::string> &params) override {
+        for (auto &it: params) {
+            if (it.first == "max_n_element") {
+                std::istringstream iss(it.second);
+                size_t new_n;
+                iss >> new_n;
+                max_n_element = new_n;
+            } else if (it.first == "bloom_k") {
+                k = stoi(it.second);
+            } else if (it.first == "fp_rate") {
+                fp_rate = stod(it.second);
+            } else if (it.first == "bloom_record_reset") {
+                int _val = stoi(it.second);
+                record_reset = _val != 0;
+            } else if (it.first == "refresh_interval") {
+                int _val = stoull(it.second);
+                refresh_interval = _val;
+            } else {
+                cerr << "Bloom filter unrecognized parameter: " << it.first << endl;
+            }
+        }
+        cerr << "Init Bloom filter. max_n_element: " << max_n_element << " fp_rate: " << fp_rate << " k: " << k << endl;
+        for (int i = 0; i < k; i++) {
+            bf::basic_bloom_filter *b = new bf::basic_bloom_filter(fp_rate, max_n_element);
+            filters.push_back(b);
+        }
+        next_refresh += refresh_interval;
+    }
+
+    size_t total_bytes_used() override {
+        size_t total = 0;
+        for (int i = 0; i < k; i++) {
+            total += filters[i]->storage().size();
+        }
+        return total / 8;
+    }
+
+    void update_stat(bsoncxx::v_noabi::builder::basic::document &doc) override {
+        doc.append(kvp("filter_size", std::to_string(total_bytes_used())));
+        doc.append(kvp("max_n_element", std::to_string(max_n_element)));
+        doc.append(kvp("fp_rate", std::to_string(fp_rate)));
+        doc.append(kvp("bloom_k", k));
+        doc.append(kvp("filter_k", k));
+        if (record_reset) {
+            doc.append(kvp("refresh_indices", [this](sub_array child) {
+                for (const auto &element : refresh_indices)
+                    child.append(element);
+            }));
+        }
+    }
+
+    bool should_filter(SimpleRequest &req) override;
+
+    uint64_t next_refresh = 0;
+    uint64_t refresh_interval = 86400;
+    size_t max_n_element = 40000000;
+    double fp_rate = 0.001;
+    uint16_t curr_filter_idx = 0;
+    int n_added_obj = 0;
+    int k = 2;
+    bool record_reset = false;
+    std::vector <int64_t> refresh_indices;
+    std::vector<bf::basic_bloom_filter *> filters;
+};
+
+static FilterFactory <IntervalBloomFilter> factoryIntervalBloomFilter("IntervalBloom");
+
+
 class SetFilter : public Filter {
 public:
     SetFilter() : Filter() {}

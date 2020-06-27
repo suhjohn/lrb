@@ -29,6 +29,32 @@ bool BloomFilter::should_filter(SimpleRequest &req) {
 }
 
 
+bool IntervalBloomFilter::should_filter(SimpleRequest &req) {
+    auto key = req.get_id();
+    auto t = req.get_t();
+    auto timestamp = req.get_timestamp();
+    for (int i = 0; i < k; i++) {
+        if (filters[i]->lookup(key)) {
+            return false;
+        }
+    }
+    if (timestamp > next_refresh) {
+        // clear the least recently used filter, which will now be our current filter
+        next_refresh += refresh_interval;
+        curr_filter_idx = (curr_filter_idx + 1) % k;
+        filters[curr_filter_idx]->clear();
+        if (record_reset) {
+            refresh_indices.push_back(t);
+        }
+
+    }
+    filters[curr_filter_idx]->add(key);
+    // keep track of number of requests for the current filter
+    return true;
+}
+
+
+
 bool InsertingBloomFilter::should_filter(SimpleRequest &req) {
     auto key = req.get_id();
     auto t = req.get_t();
