@@ -5,8 +5,8 @@ trace_files:
   - wiki2018.tr
   - wiki2019.tr
 cache_types:
-#  - LRB
-  - LRU
+  - LRB
+#  - LRU
 #  - LFUDA
 #  - LRUK
 #  - GDSF
