@@ -63,6 +63,7 @@ wiki2018.tr:
   segment_window: 10000000
   real_time_segment_window: 6000
   enable_trace_format_check: 0
+  max_n_element:
     #    - 1
     #    - 2
     #    - 4
