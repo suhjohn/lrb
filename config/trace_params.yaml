@@ -1,10 +1,10 @@
 wiki2018.tr:
   is_metadata_in_cache_size: 0
   cache_sizes:
-    - 68719476736
-    - 137438953472
-    - 274877906944
-    - 549755813888
+#    - 68719476736
+#    - 137438953472
+#    - 274877906944
+#    - 549755813888
     - 1099511627776
 #    - 68719476736:
 #        LRU:
@@ -62,11 +62,11 @@ wiki2018.tr:
   segment_window: 10000000
   real_time_segment_window: 6000
   enable_trace_format_check: 0
-  max_n_element:
-#    - 10000000 # nuggets
-#    - 5000000
-    - 15000000 # nhit
-    - 30000000
+#  max_n_element:
+##    - 10000000 # nuggets
+##    - 5000000
+#    - 15000000 # nhit
+#    - 30000000
 ##        - 1
 ##        - 2
 ##        - 4
@@ -126,22 +126,22 @@ wiki2018.tr:
 #    - 10000000
 #    - 100000000
 #    - 40000000
-  bloom_k:
-    - 2
+#  bloom_k:
+#    - 2
 ##    - 4
 ##    - 8
 ##    - 16
 ##    - 32
 ##  bloom_track_k_hit: 1
-  version:
-    - 2
-  filter_type:
+#  version:
+#    - 2
+#  filter_type:
 #    #    - Set
-    - IntervalBloom
+#    - IntervalBloom
 #    - Bloom
-  refresh_interval:
+#  refresh_interval:
 #    - 172800 # nuggets
-    - 463856 # n-hit
+#    - 463856 # n-hit
 #  access_resource_counter_window: 100000
 #  access_resource_counter_reduction_factor: 100000
 #  track_access_frequency_hit: 1
@@ -150,18 +150,18 @@ wiki2018.tr:
 #  track_eviction_age: 1
 #  bloom_record_reset: 1
 #  track_no_hit_eviction_age: 1
-  track_admission: 1
+#  track_admission: 1
 #  bloom_track_fp: 1
-#  track_interrequest_classification: 1
-#  stop_seq: 1400000000
+  track_interrequest_classification: 1
+  stop_seq: 1400000000
 
 wiki2019.tr:
   is_metadata_in_cache_size: 0
   cache_sizes:
-  - 68719476736
-  - 137438953472
-  - 274877906944
-  - 549755813888
+#  - 68719476736
+#  - 137438953472
+#  - 274877906944
+#  - 549755813888
   - 1099511627776
 #    - 68719476736:
 #        LRU:
@@ -225,11 +225,11 @@ wiki2019.tr:
   segment_window: 10000000
   real_time_segment_window: 6000
   enable_trace_format_check: 0
-  max_n_element:
+#  max_n_element:
 #    - 10000000 # nuggets
 #    - 5000000
-    - 21000000 # nhit
-    - 42000000
+#    - 21000000 # nhit
+#    - 42000000
 ##    - 1
 ##    - 2
 ##    - 4
@@ -289,22 +289,22 @@ wiki2019.tr:
 #    - 10000000
 #    - 100000000
 #    - 40000000
-  bloom_k:
+#  bloom_k:
 #    - 1
-    - 2
+#    - 2
 #    - 4
 #    - 8
 #    - 16
 #    - 32
 #  bloom_track_k_hit: 1
-  version:
-    - 2
-  filter_type:
+#  version:
+#    - 2
+#  filter_type:
 #    - Bloom
-    - IntervalBloom
-  refresh_interval:
+#    - IntervalBloom
+#  refresh_interval:
 #    - 172800 # nuggets
-    - 733507 # nhit
+#    - 733507 # nhit
 #  access_resource_counter_window: 100000
 #  access_resource_counter_reduction_factor: 100000
 #  track_access_frequency_hit: 1
@@ -313,8 +313,8 @@ wiki2019.tr:
 #  track_eviction_age: 1
 #  track_no_hit_eviction_age: 1
 #  bloom_record_reset: 1
-  track_admission: 1
+#  track_admission: 1
 #  bloom_track_fp: 1
-#  track_interrequest_classification: 1
-#  stop_seq: 1328000000
+  track_interrequest_classification: 1
+  stop_seq: 1328000000
 
