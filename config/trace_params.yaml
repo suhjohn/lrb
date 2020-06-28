@@ -7,56 +7,51 @@ wiki2018.tr:
 #    - 549755813888
 #    - 1099511627776
 #    - 68719476736
-#    - 68719476736:
-#        LRU:
-#          max_n_element:
-##            - 40000000
-##            - 32768
-#            - 10000000
-#        LRB:
-#          memory_window:
-#            - 58720256
-#          byte_million_req:
-#            - 35234263115
-#    - 137438953472:
-#        LRU:
-#          max_n_element:
-##            - 40000000
-##            - 100000
-#            - 10000000
-#        LRB:
-#          memory_window:
-#            - 100663296
-#          byte_million_req:
-#            - 35234263115
-#    - 274877906944:
-#        LRU:
-#          max_n_element:
-##            - 40000000
-##            - 262144
-#            - 10000000
-#        LRB:
-#          memory_window:
-#            - 167772160
-#          byte_million_req:
-#            - 35234263115
+    - 68719476736:
+        LRU:
+          max_n_element:
+            - 262144
+            - 16384
+        LRB:
+          memory_window:
+            - 58720256
+          byte_million_req:
+            - 35234263115
+    - 137438953472:
+        LRU:
+          max_n_element:
+            - 524288
+            - 16384
+        LRB:
+          memory_window:
+            - 100663296
+          byte_million_req:
+            - 35234263115
+    - 274877906944:
+        LRU:
+          max_n_element:
+            - 1594323
+            - 65536
+        LRB:
+          memory_window:
+            - 167772160
+          byte_million_req:
+            - 35234263115
     - 549755813888:
-#        LRU:
-#          max_n_element:
-##            - 40000000
-##            - 262144
-#            - 10000000
+        LRU:
+          max_n_element:
+            - 1048576
+            - 262144
         LRB:
           memory_window:
             - 335544320
           byte_million_req:
             - 35234263115
     - 1099511627776:
-#        LRU:
-#          max_n_element:
-##            - 40000000
-##            - 1000000
-#            - 10000000
+        LRU:
+          max_n_element:
+            - 4194304
+            - 1000000
         LRB:
           memory_window:
             - 671088640
@@ -68,9 +63,9 @@ wiki2018.tr:
   segment_window: 10000000
   real_time_segment_window: 6000
   enable_trace_format_check: 0
-  max_n_element:
-    - 15000000
-    - 30000000
+#  max_n_element:
+#    - 15000000
+#    - 30000000
 ##        - 1
 ##        - 2
 ##        - 4
@@ -141,10 +136,11 @@ wiki2018.tr:
     - 2
   filter_type:
     #    - Set
-    - IntervalBloom
-  refresh_interval:
+#    - IntervalBloom
+    - Bloom
+#  refresh_interval:
 #    - 172800
-    - 463856 # n-hit
+#    - 463856 # n-hit
 #  access_resource_counter_window: 100000
 #  access_resource_counter_reduction_factor: 100000
 #  track_access_frequency_hit: 1
@@ -164,58 +160,51 @@ wiki2019.tr:
 #  - 274877906944
 #  - 549755813888
 #  - 1099511627776
-#    - 68719476736:
-#        LRU:
-#          max_n_element:
-##            - 40000000
-##            - 400000
-#            - 10000000
-#        LRB:
-#          memory_window:
-#            - 58720256
-#          byte_million_req:
-#            - 35234263115
-#    - 137438953472:
-#        LRU:
-#          max_n_element:
-##            - 40000000
-##            - 600000
-#            - 10000000
-#        LRB:
-#          memory_window:
-#            - 100663296
-#          byte_million_req:
-#            - 35234263115
-#    - 274877906944:
-#        LRU:
-#          max_n_element:
-##            - 40000000
-##            - 800000
-#            - 10000000
-#        LRB:
-#          memory_window:
-#            - 167772160
-#          byte_million_req:
-#            - 35234263115
-#    - 549755813888:
-#        LRU:
-#          max_n_element:
-##            - 40000000
-##            - 1600000
-#            - 10000000
-#        LRB:
-#          memory_window:
-#            - 335544320
-#          byte_million_req:
-#            - 35234263115
+    - 68719476736:
+        LRU:
+          max_n_element:
+            - 400000
+            - 177147
+        LRB:
+          memory_window:
+            - 58720256
+          byte_million_req:
+            - 35234263115
+    - 137438953472:
+        LRU:
+          max_n_element:
+            - 400000
+            - 177147
+        LRB:
+          memory_window:
+            - 100663296
+          byte_million_req:
+            - 35234263115
+    - 274877906944:
+        LRU:
+          max_n_element:
+            - 400000
+            - 177147
+        LRB:
+          memory_window:
+            - 167772160
+          byte_million_req:
+            - 35234263115
+    - 549755813888:
+        LRU:
+          max_n_element:
+            - 400000
+            - 177147
+        LRB:
+          memory_window:
+            - 335544320
+          byte_million_req:
+            - 35234263115
     - 1099511627776:
-#        LRU:
-#          max_n_element:
-##            - 50510000
-##            - 40000000
-##            - 4194304
-##            - 16384
-#            - 10000000
+        LRU:
+          max_n_element:
+            - 400000
+            - 177147
         LRB:
           memory_window:
             - 671088640
@@ -227,11 +216,11 @@ wiki2019.tr:
   segment_window: 10000000
   real_time_segment_window: 6000
   enable_trace_format_check: 0
-  max_n_element:
-#    - 10000000 # nuggets
-#    - 5000000
-    - 21000000 # nhit
-    - 42000000
+#  max_n_element:
+##    - 10000000 # nuggets
+##    - 5000000
+#    - 21000000 # nhit
+#    - 42000000
 ##    - 1
 ##    - 2
 ##    - 4
@@ -302,10 +291,10 @@ wiki2019.tr:
   version:
     - 2
   filter_type:
-#    - Bloom
-    - IntervalBloom
-  refresh_interval:
-    - 733507
+    - Bloom
+#    - IntervalBloom
+#  refresh_interval:
+#    - 733507
 #  access_resource_counter_window: 100000
 #  access_resource_counter_reduction_factor: 100000
 #  track_access_frequency_hit: 1
