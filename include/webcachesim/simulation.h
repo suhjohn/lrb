@@ -107,6 +107,8 @@ public:
     bool track_admission = false; // track the stats of admissions
     AdmitTracker *admitTracker;
 
+    bool track_interrequest_classification = false;
+    TraceInterrequestClassification *traceInterrequestClassification;
 
     FrameWork(const std::string &trace_file, const std::string &cache_type, const uint64_t &cache_size,
               std::map<std::string, std::string> &params);

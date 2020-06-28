@@ -104,6 +104,10 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
             int _val = stoi(it->second);
             track_admission = _val != 0;
             ++it;
+        } else if (it->first == "track_interrequest_classification") {
+            int _val = stoi(it->second);
+            track_interrequest_classification = _val != 0;
+            ++it;
         } else {
             ++it;
         }
@@ -217,7 +221,9 @@ FrameWork::FrameWork(const string &trace_file, const string &cache_type, const u
     if (track_admission) {
         admitTracker = new AdmitTracker();
     }
-
+    if (track_interrequest_classification) {
+        traceInterrequestClassification = new TraceInterrequestClassification(stoull(params["stop_seq"]));
+    }
     adjust_real_time_offset();
     extra_features = vector<uint16_t>(n_extra_fields);
 }
@@ -324,6 +330,15 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
             dynamic_cast<AnnotatedRequest *>(req)->reinit(id, size, seq, next_seq, &extra_features);
         else
             req->reinit(id, size, seq, t, &extra_features);
+
+        if (track_interrequest_classification) {
+            if (traceInterrequestClassification->is_recording_seq(seq)) {
+                traceInterrequestClassification->record(*req, seq, webcache->lookup(*req));
+                continue
+            } else {
+                traceInterrequestClassification->add(*req, seq);
+            }
+        }
 
         // Different admission strategy depending on version
         if (version == 1) {
@@ -534,6 +549,9 @@ bsoncxx::builder::basic::document FrameWork::simulation_results() {
     }
     if (track_admission) {
         admitTracker->update_stat(value_builder);
+    }
+    if (track_interrequest_classification) {
+        traceInterrequestClassification->update_stat(value_builder);
     }
     webcache->update_stat(value_builder);
     return value_builder;

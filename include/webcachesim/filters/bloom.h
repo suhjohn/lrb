@@ -56,7 +56,8 @@ public:
                 cerr << "InsertingBloom filter unrecognized parameter: " << it.first << endl;
             }
         }
-        cerr << "Init InsertingBloom filter. max_n_element: " << max_n_element << " fp_rate: " << fp_rate << " k: " << k << endl;
+        cerr << "Init InsertingBloom filter. max_n_element: " << max_n_element << " fp_rate: " << fp_rate << " k: " << k
+             << endl;
         for (int i = 0; i < k; i++) {
             bf::basic_bloom_filter *b = new bf::basic_bloom_filter(fp_rate, max_n_element);
             filters.push_back(b);
@@ -163,7 +164,6 @@ public:
 };
 
 static FilterFactory <BloomFilter> factoryBloomFilter("Bloom");
-
 
 
 class IntervalBloomFilter : public Filter {
@@ -997,6 +997,85 @@ public:
         doc.append(kvp("access_age_counter_segment_window", segment_window));
         doc.append(kvp("access_age_buckets_obj_freq_bytes", bytes_classified_by_obj_freq));
         doc.append(kvp("access_age_buckets_req_freq_bytes", bytes_classified_by_req_freq));
+    }
+};
+
+class TraceInterrequestClassification {
+public:
+    int trace_length = 0;
+    unordered_map<uint64_t, uint64_t> key_seq_map; // Record the most recent seq of the obj
+    unordered_set<uint64_t> seen;
+    vector <vector<int64_t>> interrequest_freq_arr; // [[0,0], [0,0]....,[0,0]] length 40.
+    vector <vector<int64_t>> interrequest_size_arr;
+    uint64_t stop_seq = 0;
+
+    TraceInterrequestClassification(uint64_t _stop_seq) {
+        stop_seq = _stop_seq;
+        for (int i = 0; i < 40; i++) {
+            // size of 2
+            vector <int64_t> interrequest_freq_boolean_classifier;
+            vector <int64_t> interrequest_size_boolean_classifier;
+
+            for (int j = 0; j < 2; j++) {
+                interrequest_freq_boolean_classifier.push_back(0);
+                interrequest_size_boolean_classifier.push_back(0);
+            }
+            interrequest_freq_arr.push_back(interrequest_freq_boolean_classifier);
+            interrequest_size_arr.push_back(interrequest_size_boolean_classifier);
+        }
+
+    }
+
+    bool is_recording_seq(uint64_t curr_seq) {
+        return curr_seq > stop_seq;
+    }
+
+    void record(SimpleRequest &req, uint64_t _seq, bool obj_is_in_cache) {
+        uint64_t key = req.get_id();
+        if (seen.find(key) != seen.end()) { // don't record objects that we already recorded.
+            return;
+        }
+        if (key_seq_map.count(key) == 0){
+            return;
+        }
+        seen.insert(key);
+        uint64_t last_accessed_seq = key_seq_map[key];
+        uint64_t age = _seq - last_accessed_seq;
+
+        int bits, var = (age < 0) ? -age : age;
+        for (bits = 0; var != 0; ++bits) var >>= 1;
+
+        int64_t bool_classifier_index = obj_is_in_cache ? 1 : 0;
+        interrequest_freq_arr[bits][bool_classifier_index] += 1;
+        interrequest_size_arr[bits][bool_classifier_index] += req.get_size();
+    }
+
+    void add(SimpleRequest &req, uint64_t _seq){
+        uint64_t key = req.get_id();
+        key_seq_map[key] = _seq;
+    }
+
+
+    void update_stat(bsoncxx::v_noabi::builder::basic::document &doc) {
+        auto arr = bsoncxx::builder::stream::array{};
+        for (int i = 0; i < interrequest_freq_arr.size(); i++) {
+            arr << open_array;
+            for (int j = 0; j < interrequest_freq_arr[i].size(); j++) {
+                arr << interrequest_freq_arr[i][j];
+            }
+            arr << close_array;
+        }
+        doc.append(kvp("interrequest_freq_arr", arr));
+
+        auto arr2 = bsoncxx::builder::stream::array{};
+        for (int i = 0; i < interrequest_size_arr.size(); i++) {
+            arr2 << open_array;
+            for (int j = 0; j < interrequest_size_arr[i].size(); j++) {
+                arr2 << interrequest_size_arr[i][j];
+            }
+            arr2 << close_array;
+        }
+        doc.append(kvp("interrequest_size_arr", arr2));
     }
 };
 
