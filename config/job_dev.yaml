@@ -3,13 +3,13 @@ enable_trace_format_check: 0
 uni_size: 0
 trace_files:
   - wiki2018.tr
-  - wiki2019.tr
+#  - wiki2019.tr
 cache_types:
-  - LRB
+#  - LRB
   - LRU
-  - LFUDA
-  - LRUK
+#  - LFUDA
+#  - LRUK
 #  - GDSF
-  - LeCaR
-  - UCB
-  - Hyperbolic
+#  - LeCaR
+#  - UCB
+#  - Hyperbolic
