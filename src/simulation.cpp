@@ -334,7 +334,7 @@ bsoncxx::builder::basic::document FrameWork::simulate() {
         if (track_interrequest_classification) {
             if (traceInterrequestClassification->is_recording_seq(seq)) {
                 traceInterrequestClassification->record(*req, seq, webcache->lookup(*req));
-                continue
+                continue;
             } else {
                 traceInterrequestClassification->add(*req, seq);
             }
