@@ -167,50 +167,50 @@ wiki2019.tr:
 #  - 274877906944
 #  - 549755813888
 #  - 1099511627776
-    - 68719476736:
-        LRU:
-          max_n_element:
-#            - 400000
-#            - 177147
-            - 177147 #fit
+#    - 68719476736:
+#        LRU:
+#          max_n_element:
+##            - 400000
+##            - 177147
+#            - 177147 #fit
 #        LRB:
 #          memory_window:
 #            - 58720256
 #          byte_million_req:
 #            - 35234263115
-    - 137438953472:
-        LRU:
-          max_n_element:
-#            - 600000 # heuristic
-#            - 400000
-#            - 177147
-            - 177147 #fit
+#    - 137438953472:
+#        LRU:
+#          max_n_element:
+##            - 600000 # heuristic
+##            - 400000
+##            - 177147
+#            - 177147 #fit
 #        LRB:
 #          memory_window:
 #            - 100663296
 #          byte_million_req:
 #            - 35234263115
-    - 274877906944:
-        LRU:
-          max_n_element:
-##            - 1000000
-#            - 262144
-##            - 400000
-#            - 177147
-            - 800000 # fit
+#    - 274877906944:
+#        LRU:
+#          max_n_element:
+###            - 1000000
+##            - 262144
+###            - 400000
+##            - 177147
+#            - 800000 # fit
 #        LRB:
 #          memory_window:
 #            - 167772160
 #          byte_million_req:
 #            - 35234263115
-    - 549755813888:
-        LRU:
-          max_n_element:
-#            - 524288 # opt
-#            - 2097152 # heuristic
-#            - 400000
-#            - 177147
-            - 4194304 # fit
+#    - 549755813888:
+#        LRU:
+#          max_n_element:
+##            - 524288 # opt
+##            - 2097152 # heuristic
+##            - 400000
+##            - 177147
+#            - 4194304 # fit
 #        LRB:
 #          memory_window:
 #            - 335544320
@@ -221,9 +221,9 @@ wiki2019.tr:
           max_n_element:
 #            - 400000
 #            - 177147
-#            - 4194304 # opt
+            - 4194304 # opt
 #            - 4782969 # heuristic
-            - 8388608 # fit
+#            - 8388608 # fit
 #        LRB:
 #          memory_window:
 #            - 671088640
@@ -310,8 +310,8 @@ wiki2019.tr:
   version:
     - 2
   filter_type:
-    - Bloom
-#    - Set
+#    - Bloom
+    - Set
 #    - IntervalBloom
 #  refresh_interval:
 #    - 172800 # nuggets
@@ -320,11 +320,11 @@ wiki2019.tr:
 #  access_resource_counter_reduction_factor: 100000
 #  track_access_frequency_hit: 1
 #  track_access_resource_hit: 1
-#  track_access_age_hit: 1
+  track_access_age_hit: 1
 #  track_eviction_age: 1
 #  track_no_hit_eviction_age: 1
 #  bloom_record_reset: 1
-  track_admission: 1
+#  track_admission: 1
 #  bloom_track_fp: 1
 #  track_interrequest_classification: 1
 #  stop_seq: 1328000000
