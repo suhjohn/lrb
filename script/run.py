@@ -185,4 +185,5 @@ class WebcachesimExecutor:
 if __name__ == '__main__':
     executor = WebcachesimExecutor("config", DBURI, TELEGRAM_API_KEY, TELEGRAM_CHAT_ID)
     # executor.build()
-    executor.run()
+    # executor.run()
+    executor._run_program("ps aux | grep python")
