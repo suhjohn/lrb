@@ -1043,7 +1043,7 @@ public:
         uint64_t age = _seq - last_accessed_seq;
 
         int bits, var = (age < 0) ? -age : age;
-        for (bits = 0; var != 0; ++bits) var >>= 1;
+        for (bits = 0; var > 0; ++bits) var >>= 1;
 
         int64_t bool_classifier_index = obj_is_in_cache ? 1 : 0;
         interrequest_freq_arr[bits][bool_classifier_index] += 1;
